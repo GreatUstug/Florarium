@@ -1,0 +1,11 @@
+.git
+.gitignore
+
+main
+*.exe
+
+*.log
+*.tmp
+
+.vscode
+.idea
