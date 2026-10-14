@@ -1,0 +1,14 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": ["src/styles/classical.css", "dist/**"],
+  "rules": {
+    "color-no-hex": true,
+    "color-named": "never",
+    "function-disallowed-list": ["rgb", "rgba", "hsl", "hsla", "oklch"],
+    "unit-disallowed-list": ["px"],
+    "declaration-property-value-allowed-list": {
+      "font-family": ["/^var\\(--font-[a-z-]+\\)$/", "inherit"]
+    },
+    "selector-class-pattern": null
+  }
+}
