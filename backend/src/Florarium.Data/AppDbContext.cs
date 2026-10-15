@@ -1,3 +1,4 @@
+using Florarium.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Data;
@@ -8,4 +9,11 @@ public class AppDbContext : DbContext
     {
     }
 
+    public DbSet<Flower> Flowers => Set<Flower>();
+    public DbSet<Stock> Stocks => Set<Stock>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
 }
