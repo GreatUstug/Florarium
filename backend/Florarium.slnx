@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Florarium.Api/Florarium.Api.csproj" />
+    <Project Path="src/Florarium.Data/Florarium.Data.csproj" />
+    <Project Path="src/Florarium.Domain/Florarium.Domain.csproj" />
+  </Folder>
+</Solution>

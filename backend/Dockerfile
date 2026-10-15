@@ -1,16 +1,26 @@
-FROM golang:1.25-alpine
+# ---- build stage ----
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
-WORKDIR /app
+COPY Florarium.slnx ./
+COPY src/Florarium.Domain/Florarium.Domain.csproj src/Florarium.Domain/
+COPY src/Florarium.Data/Florarium.Data.csproj     src/Florarium.Data/
+COPY src/Florarium.Api/Florarium.Api.csproj       src/Florarium.Api/
 
-COPY go.mod ./
-COPY go.sum ./
-
-RUN go mod download
+RUN dotnet restore Florarium.slnx
 
 COPY . .
+RUN dotnet publish src/Florarium.Api/Florarium.Api.csproj \
+    -c Release -o /app/publish /p:UseAppHost=false
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+# ---- runtime stage ----
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
 
-EXPOSE 8181
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Development
+EXPOSE 8080
 
-CMD ["./main"]
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "Florarium.Api.dll"]
