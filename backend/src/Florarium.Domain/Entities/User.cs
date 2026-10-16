@@ -3,10 +3,11 @@
 public class User
 {
     public Guid Id { get; set; }
+    public Guid RoleId { get; set; }
     public string Name { get; set; } = null!;
     public string? Phone { get; set; }
     public string Email { get; set; } = null!;
-    public DateTime RegisteredAt  { get; set; } =  DateTime.UtcNow;
+    public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
 
     public Role Role { get; set; } = null!;
     public ICollection<Address> Addresses { get; set; } = new List<Address>();

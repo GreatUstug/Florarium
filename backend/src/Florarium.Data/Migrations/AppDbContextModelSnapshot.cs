@@ -22,6 +22,267 @@ namespace Florarium.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Florarium.Domain.Entities.Address", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Apartment")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("apartment");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("Entrance")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("entrance");
+
+                    b.Property<string>("Floor")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("floor");
+
+                    b.Property<string>("Intercom")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("intercom");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("label");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("street");
+
+                    b.HasKey("Id")
+                        .HasName("pk_address");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_address_customer_id");
+
+                    b.ToTable("address", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Cart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cart");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_cart_customer_id");
+
+                    b.ToTable("cart", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.CartItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CartId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cart_id");
+
+                    b.Property<Guid>("CompositionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("composition_id");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer")
+                        .HasColumnName("qty");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("unit_price");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cart_item");
+
+                    b.HasIndex("CartId")
+                        .HasDatabaseName("ix_cart_item_cart_id");
+
+                    b.HasIndex("CompositionId")
+                        .HasDatabaseName("ix_cart_item_composition_id");
+
+                    b.ToTable("cart_item", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Composition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("CardText")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("card_text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("PackagingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("packaging_id");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("photo_url");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("price");
+
+                    b.Property<Guid?>("RibbonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ribbon_id");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source");
+
+                    b.HasKey("Id")
+                        .HasName("pk_composition");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_composition_author_id");
+
+                    b.HasIndex("PackagingId")
+                        .HasDatabaseName("ix_composition_packaging_id");
+
+                    b.HasIndex("RibbonId")
+                        .HasDatabaseName("ix_composition_ribbon_id");
+
+                    b.HasIndex("Source")
+                        .HasDatabaseName("ix_composition_source");
+
+                    b.ToTable("composition", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.CompositionItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CompositionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("composition_id");
+
+                    b.Property<Guid>("FlowerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("flower_id");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer")
+                        .HasColumnName("qty");
+
+                    b.HasKey("Id")
+                        .HasName("pk_composition_item");
+
+                    b.HasIndex("FlowerId")
+                        .HasDatabaseName("ix_composition_item_flower_id");
+
+                    b.HasIndex("CompositionId", "FlowerId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_composition_item_composition_id_flower_id");
+
+                    b.ToTable("composition_item", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Delivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CourierNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("courier_note");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_at");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("RecipientName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("recipient_name");
+
+                    b.Property<string>("Slot")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("slot");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_delivery");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_delivery_order_id");
+
+                    b.ToTable("delivery", (string)null);
+                });
+
             modelBuilder.Entity("Florarium.Domain.Entities.Flower", b =>
                 {
                     b.Property<Guid>("Id")
@@ -77,6 +338,268 @@ namespace Florarium.Data.Migrations
                     b.ToTable("flower", (string)null);
                 });
 
+            modelBuilder.Entity("Florarium.Domain.Entities.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<decimal>("Discount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("discount");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("number");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("subtotal");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("total");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_order_customer_id");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_order_number");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_order_status");
+
+                    b.ToTable("order", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.OrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CompositionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("composition_id");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer")
+                        .HasColumnName("qty");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("unit_price");
+
+                    b.HasKey("Id")
+                        .HasName("pk_order_item");
+
+                    b.HasIndex("CompositionId")
+                        .HasDatabaseName("ix_order_item_composition_id");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_order_item_order_id");
+
+                    b.ToTable("order_item", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Packaging", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("price");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("pk_packaging");
+
+                    b.ToTable("packaging", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("method");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payment");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_payment_order_id");
+
+                    b.ToTable("payment", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Rating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_item_id");
+
+                    b.Property<short>("Stars")
+                        .HasColumnType("smallint")
+                        .HasColumnName("stars");
+
+                    b.PrimitiveCollection<string[]>("Tags")
+                        .HasColumnType("text[]")
+                        .HasColumnName("tags");
+
+                    b.Property<string>("Text")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("text");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rating");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_rating_customer_id");
+
+                    b.HasIndex("OrderItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_rating_order_item_id");
+
+                    b.ToTable("rating", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Ribbon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ColorHex")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("color_hex");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ribbon");
+
+                    b.ToTable("ribbon", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<short>("Rights")
+                        .HasColumnType("smallint")
+                        .HasColumnName("rights");
+
+                    b.HasKey("Id")
+                        .HasName("pk_role");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_role_name");
+
+                    b.ToTable("role", (string)null);
+                });
+
             modelBuilder.Entity("Florarium.Domain.Entities.Stock", b =>
                 {
                     b.Property<Guid>("FlowerId")
@@ -109,6 +632,301 @@ namespace Florarium.Data.Migrations
                     b.ToTable("stock", (string)null);
                 });
 
+            modelBuilder.Entity("Florarium.Domain.Entities.StockReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CartItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cart_item_id");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("FlowerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("flower_id");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer")
+                        .HasColumnName("qty");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_reservation");
+
+                    b.HasIndex("CartItemId")
+                        .HasDatabaseName("ix_stock_reservation_cart_item_id");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("ix_stock_reservation_expires_at");
+
+                    b.HasIndex("FlowerId")
+                        .HasDatabaseName("ix_stock_reservation_flower_id");
+
+                    b.ToTable("stock_reservation", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.SupplyBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("FlowerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("flower_id");
+
+                    b.Property<DateOnly?>("FreshUntil")
+                        .HasColumnType("date")
+                        .HasColumnName("fresh_until");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("purchase_price");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer")
+                        .HasColumnName("qty");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_supply_batch");
+
+                    b.HasIndex("FlowerId")
+                        .HasDatabaseName("ix_supply_batch_flower_id");
+
+                    b.ToTable("supply_batch", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registered_at");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_email");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_user_role_id");
+
+                    b.ToTable("user", (string)null);
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Address", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.User", "Customer")
+                        .WithMany("Addresses")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_address_users_customer_id");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Cart", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cart_users_customer_id");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.CartItem", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Cart", "Cart")
+                        .WithMany("Items")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cart_item_cart_cart_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Composition", "Composition")
+                        .WithMany("CartItems")
+                        .HasForeignKey("CompositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cart_item_compositions_composition_id");
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Composition");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Composition", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.User", "Author")
+                        .WithMany("Compositions")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_composition_users_author_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Packaging", "Packaging")
+                        .WithMany("Compositions")
+                        .HasForeignKey("PackagingId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_composition_packagings_packaging_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Ribbon", "Ribbon")
+                        .WithMany("Compositions")
+                        .HasForeignKey("RibbonId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_composition_ribbons_ribbon_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Packaging");
+
+                    b.Navigation("Ribbon");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.CompositionItem", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Composition", "Composition")
+                        .WithMany("Items")
+                        .HasForeignKey("CompositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_composition_item_composition_composition_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Flower", "Flower")
+                        .WithMany("CompositionItems")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_composition_item_flowers_flower_id");
+
+                    b.Navigation("Composition");
+
+                    b.Navigation("Flower");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Delivery", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Order", "Order")
+                        .WithOne("Delivery")
+                        .HasForeignKey("Florarium.Domain.Entities.Delivery", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_delivery_orders_order_id");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Order", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.User", "Customer")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_users_customer_id");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.OrderItem", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Composition", "Composition")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("CompositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_item_composition_composition_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Order", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_item_order_order_id");
+
+                    b.Navigation("Composition");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Order", "Order")
+                        .WithMany("Payments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_payment_order_order_id");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Rating", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.User", "Customer")
+                        .WithMany("Ratings")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_rating_users_customer_id");
+
+                    b.HasOne("Florarium.Domain.Entities.OrderItem", "OrderItem")
+                        .WithOne("Rating")
+                        .HasForeignKey("Florarium.Domain.Entities.Rating", "OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rating_order_item_order_item_id");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("OrderItem");
+                });
+
             modelBuilder.Entity("Florarium.Domain.Entities.Stock", b =>
                 {
                     b.HasOne("Florarium.Domain.Entities.Flower", "Flower")
@@ -121,10 +939,120 @@ namespace Florarium.Data.Migrations
                     b.Navigation("Flower");
                 });
 
+            modelBuilder.Entity("Florarium.Domain.Entities.StockReservation", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.CartItem", "CartItem")
+                        .WithMany("Reservations")
+                        .HasForeignKey("CartItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_reservation_cart_item_cart_item_id");
+
+                    b.HasOne("Florarium.Domain.Entities.Flower", "Flower")
+                        .WithMany("StockReservations")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_reservation_flower_flower_id");
+
+                    b.Navigation("CartItem");
+
+                    b.Navigation("Flower");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.SupplyBatch", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Flower", "Flower")
+                        .WithMany("SupplyBatches")
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_batch_flower_flower_id");
+
+                    b.Navigation("Flower");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.User", b =>
+                {
+                    b.HasOne("Florarium.Domain.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_role_role_id");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Cart", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.CartItem", b =>
+                {
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Composition", b =>
+                {
+                    b.Navigation("CartItems");
+
+                    b.Navigation("Items");
+
+                    b.Navigation("OrderItems");
+                });
+
             modelBuilder.Entity("Florarium.Domain.Entities.Flower", b =>
                 {
+                    b.Navigation("CompositionItems");
+
                     b.Navigation("Stock")
                         .IsRequired();
+
+                    b.Navigation("StockReservations");
+
+                    b.Navigation("SupplyBatches");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("Delivery");
+
+                    b.Navigation("Items");
+
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.OrderItem", b =>
+                {
+                    b.Navigation("Rating");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Packaging", b =>
+                {
+                    b.Navigation("Compositions");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Ribbon", b =>
+                {
+                    b.Navigation("Compositions");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Florarium.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Addresses");
+
+                    b.Navigation("Compositions");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }
