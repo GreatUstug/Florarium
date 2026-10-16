@@ -18,7 +18,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.HasOne(x => x.Role)
             .WithMany(x => x.Users)
             .HasForeignKey(x => x.RoleId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         
         b.HasIndex(x => x.Email).IsUnique();
     }
