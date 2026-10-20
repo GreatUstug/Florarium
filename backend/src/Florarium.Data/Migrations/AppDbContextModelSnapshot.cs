@@ -22,6 +22,9 @@ namespace Florarium.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("order_number_seq")
+                .StartsAt(1000L);
+
             modelBuilder.Entity("Florarium.Domain.Entities.Address", b =>
                 {
                     b.Property<Guid>("Id")
@@ -94,6 +97,7 @@ namespace Florarium.Data.Migrations
                         .HasName("pk_cart");
 
                     b.HasIndex("CustomerId")
+                        .IsUnique()
                         .HasDatabaseName("ix_cart_customer_id");
 
                     b.ToTable("cart", (string)null);
@@ -181,6 +185,11 @@ namespace Florarium.Data.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("source");
 
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
                     b.HasKey("Id")
                         .HasName("pk_composition");
 
@@ -240,6 +249,11 @@ namespace Florarium.Data.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("Apartment")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("apartment");
+
                     b.Property<string>("CourierNote")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
@@ -253,6 +267,21 @@ namespace Florarium.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("delivered_at");
 
+                    b.Property<string>("Entrance")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("entrance");
+
+                    b.Property<string>("Floor")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("floor");
+
+                    b.Property<string>("Intercom")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("intercom");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
@@ -261,6 +290,11 @@ namespace Florarium.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("recipient_name");
+
+                    b.Property<string>("RecipientPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("recipient_phone");
 
                     b.Property<string>("Slot")
                         .HasMaxLength(50)
@@ -272,6 +306,12 @@ namespace Florarium.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("street");
 
                     b.HasKey("Id")
                         .HasName("pk_delivery");
@@ -626,6 +666,12 @@ namespace Florarium.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("FlowerId")
                         .HasName("pk_stock");
 
@@ -729,6 +775,12 @@ namespace Florarium.Data.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("password_hash");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -770,8 +822,8 @@ namespace Florarium.Data.Migrations
             modelBuilder.Entity("Florarium.Domain.Entities.Cart", b =>
                 {
                     b.HasOne("Florarium.Domain.Entities.User", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .WithOne("Cart")
+                        .HasForeignKey("Florarium.Domain.Entities.Cart", "CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_cart_users_customer_id");
@@ -977,7 +1029,7 @@ namespace Florarium.Data.Migrations
                     b.HasOne("Florarium.Domain.Entities.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_user_role_role_id");
 
@@ -1047,6 +1099,8 @@ namespace Florarium.Data.Migrations
             modelBuilder.Entity("Florarium.Domain.Entities.User", b =>
                 {
                     b.Navigation("Addresses");
+
+                    b.Navigation("Cart");
 
                     b.Navigation("Compositions");
 

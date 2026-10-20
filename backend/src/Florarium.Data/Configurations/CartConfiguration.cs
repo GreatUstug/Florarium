@@ -13,10 +13,10 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         b.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
         
         b.HasOne(x => x.Customer)
-            .WithMany()
-            .HasForeignKey(x => x.CustomerId)
+            .WithOne(u => u.Cart) 
+            .HasForeignKey<Cart>(x => x.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        b.HasIndex(x => x.CustomerId);
+        b.HasIndex(x => x.CustomerId).IsUnique();
     }
 }

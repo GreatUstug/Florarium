@@ -17,9 +17,9 @@ public static class DbSeeder
         db.Roles.AddRange(adminRole, floristRole, clientRole);
 
         // --- пользователи ---
-        var admin = new User { Role = adminRole, Name = "Администратор", Email = "admin@florarium.local" };
-        var florist = new User { Role = floristRole, Name = "Мария Флорист", Email = "florist@florarium.local" };
-        var client = new User { Role = clientRole, Name = "Иван Петров", Email = "client@florarium.local", Phone = "+7 900 123-45-67" };
+        var admin = new User { Role = adminRole, Name = "Администратор", Email = "admin@florarium.local", PasswordHash = "DUMMY_HASH" };
+        var florist = new User { Role = floristRole, Name = "Мария Флорист", Email = "florist@florarium.local", PasswordHash = "DUMMY_HASH" };
+        var client = new User { Role = clientRole, Name = "Иван Петров", Email = "client@florarium.local", PasswordHash = "DUMMY_HASH", Phone = "+7 900 123-45-67" };
         db.Users.AddRange(admin, florist, client);
 
         // --- цветы + остатки ---
@@ -55,7 +55,7 @@ public static class DbSeeder
             Packaging = packKraft,
             Ribbon = ribbonPink,
             Source = CompositionSource.Template,
-            CardText = "Весенний микс",
+            Title = "Весенний микс",
             Items = new List<CompositionItem>
             {
                 new() { Flower = flowers[3], Qty = 7 }, // тюльпаны
@@ -68,7 +68,7 @@ public static class DbSeeder
             Packaging = packBox,
             Ribbon = ribbonWhite,
             Source = CompositionSource.Template,
-            CardText = "Красная классика",
+            Title = "Красная классика",
             Items = new List<CompositionItem>
             {
                 new() { Flower = flowers[0], Qty = 15 }, // розы
@@ -99,6 +99,7 @@ public static class DbSeeder
             {
                 Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
                 RecipientName = "Иван Петров",
+                Street = "ул. Ленина, 10",
                 Status = DeliveryStatus.Delivered,
                 DeliveredAt = DateTime.UtcNow.AddDays(-5)
             },

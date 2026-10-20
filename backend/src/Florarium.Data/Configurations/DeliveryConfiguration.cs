@@ -12,8 +12,15 @@ public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         b.HasKey(x => x.Id);
         b.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
         b.Property(x => x.RecipientName).HasMaxLength(200);
+        b.Property(x => x.RecipientPhone).HasMaxLength(20);
         b.Property(x => x.Slot).HasMaxLength(50);
         b.Property(x => x.CourierNote).HasMaxLength(500);
+        
+        b.Property(x => x.Street).HasMaxLength(300).IsRequired();
+        b.Property(x => x.Apartment).HasMaxLength(20);
+        b.Property(x => x.Entrance).HasMaxLength(20);
+        b.Property(x => x.Floor).HasMaxLength(20);
+        b.Property(x => x.Intercom).HasMaxLength(20);
 
         b.Property(x => x.Status)
             .HasConversion<string>()

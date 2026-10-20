@@ -7,9 +7,11 @@ public class User
     public string Name { get; set; } = null!;
     public string? Phone { get; set; }
     public string Email { get; set; } = null!;
+    public string PasswordHash { get; set; } = null!;
     public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
 
     public Role Role { get; set; } = null!;
+    public Cart? Cart { get; set; }
     public ICollection<Address> Addresses { get; set; } = new List<Address>();
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<Composition> Compositions { get; set; } = new List<Composition>();

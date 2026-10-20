@@ -15,6 +15,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(x => x.Email).HasMaxLength(200).IsRequired();
         b.Property(x => x.Phone).HasMaxLength(20);
         
+        b.Property(x => x.PasswordHash).HasMaxLength(200).IsRequired();
+        
         b.HasOne(x => x.Role)
             .WithMany(x => x.Users)
             .HasForeignKey(x => x.RoleId)

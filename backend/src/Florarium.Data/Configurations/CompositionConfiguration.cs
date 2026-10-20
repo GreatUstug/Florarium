@@ -11,6 +11,7 @@ public class CompositionConfiguration : IEntityTypeConfiguration<Composition>
         b.ToTable("composition");
         b.HasKey(x => x.Id);
         b.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+        b.Property(x => x.Title).HasMaxLength(200);
         b.Property(x => x.Price).HasPrecision(10, 2);
         b.Property(x => x.CardText).HasMaxLength(500);
         b.Property(x => x.PhotoUrl).HasMaxLength(500);

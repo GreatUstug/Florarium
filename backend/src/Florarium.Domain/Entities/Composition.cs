@@ -8,6 +8,8 @@ public class Composition
     public Guid AuthorId { get; set; }
     public Guid? PackagingId { get; set; }
     public Guid? RibbonId { get; set; }
+    
+    public string? Title { get; set; }
     public decimal Price { get; set; }
     public string? CardText { get; set; }
     public string? PhotoUrl { get; set; }

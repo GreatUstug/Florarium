@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Florarium.Data;
 using Florarium.Data.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +14,15 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
             npgsql.MigrationsAssembly("Florarium.Data"))
         .UseSnakeCaseNamingConvention());
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
+
+builder.Services.AddProblemDetails();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,12 +40,8 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(db);
 }
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-}
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseCors();
 

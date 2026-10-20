@@ -14,6 +14,8 @@ public class StockConfiguration : IEntityTypeConfiguration<Stock>
 
         b.Property(x => x.Available).HasDefaultValue(0);
         b.Property(x => x.Reserved).HasDefaultValue(0);
+        
+        b.Property(x => x.Version).IsRowVersion(); 
 
         b.HasOne(x => x.Flower)
             .WithOne(f => f.Stock)
