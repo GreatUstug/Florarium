@@ -10,10 +10,8 @@ COPY src/Florarium.Api/Florarium.Api.csproj       src/Florarium.Api/
 RUN dotnet restore Florarium.slnx
 
 COPY . .
-RUN dotnet publish Florarium.slnx \
-    -c Release \
-    -o /app/publish \
-    /p:UseAppHost=false
+RUN dotnet publish src/Florarium.Api/Florarium.Api.csproj \
+    -c Release -o /app/publish /p:UseAppHost=false
 
 # ---- runtime stage ----
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
