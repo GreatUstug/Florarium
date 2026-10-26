@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Florarium.Data;
 using Florarium.Data.Seed;
 using Microsoft.EntityFrameworkCore;
+using Florarium.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,15 @@ builder.Services.AddControllers()
 builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (System.IO.File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);
+});
+
+builder.Services.AddScoped<FlowersService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")
