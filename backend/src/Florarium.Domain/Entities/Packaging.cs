@@ -6,5 +6,5 @@ public class Packaging
     public string Title { get; set; } = null!;
     public decimal Price { get; set; }
 
-    public ICollection<Composition> Compositions { get; set; } = new List<Composition>();
+    public ICollection<Composition> Compositions { get; set; } = [];
 }

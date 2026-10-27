@@ -7,5 +7,5 @@ public class Cart
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public User Customer { get; set; } = null!;
-    public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
+    public ICollection<CartItem> Items { get; set; } = [];
 }

@@ -56,11 +56,11 @@ public static class DbSeeder
             Ribbon = ribbonPink,
             Source = CompositionSource.Template,
             Title = "Весенний микс",
-            Items = new List<CompositionItem>
-            {
+            Items =
+            [
                 new() { Flower = flowers[3], Qty = 7 }, // тюльпаны
                 new() { Flower = flowers[7], Qty = 3 }, // гипсофила
-            }
+            ]
         };
         var redClassic = new Composition
         {
@@ -69,11 +69,11 @@ public static class DbSeeder
             Ribbon = ribbonWhite,
             Source = CompositionSource.Template,
             Title = "Красная классика",
-            Items = new List<CompositionItem>
-            {
+            Items =
+            [
                 new() { Flower = flowers[0], Qty = 15 }, // розы
                 new() { Flower = flowers[7], Qty = 5 },  // гипсофила
-            }
+            ]
         };
         db.Compositions.AddRange(springMix, redClassic);
 
@@ -91,10 +91,10 @@ public static class DbSeeder
             Number = "ORD-2026-0001",
             Customer = client,
             Status = OrderStatus.Done,
-            Items = new List<OrderItem>
-            {
+            Items =
+            [
                 new() { Composition = springMix, Qty = 1, UnitPrice = springMix.Price }
-            },
+            ],
             Delivery = new Delivery
             {
                 Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
@@ -103,8 +103,8 @@ public static class DbSeeder
                 Status = DeliveryStatus.Delivered,
                 DeliveredAt = DateTime.UtcNow.AddDays(-5)
             },
-            Payments = new List<Payment>
-            {
+            Payments =
+            [
                 new()
                 {
                     Method = PaymentMethod.Card,
@@ -112,7 +112,7 @@ public static class DbSeeder
                     Amount = springMix.Price,
                     PaidAt = DateTime.UtcNow.AddDays(-6)
                 }
-            }
+            ]
         };
         order1.Subtotal = order1.Items.Sum(i => i.Qty * i.UnitPrice);
         order1.Discount = 0;

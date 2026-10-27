@@ -14,7 +14,7 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User Customer { get; set; } = null!;
-    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
-    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public ICollection<OrderItem> Items { get; set; } = [];
+    public ICollection<Payment> Payments { get; set; } = [];
     public Delivery? Delivery { get; set; }
 }

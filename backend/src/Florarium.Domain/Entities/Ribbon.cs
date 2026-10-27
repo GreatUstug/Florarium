@@ -6,5 +6,5 @@ public class Ribbon
     public string Title { get; set; } = null!;
     public string? ColorHex { get; set; }
 
-    public ICollection<Composition> Compositions { get; set; } = new List<Composition>();
+    public ICollection<Composition> Compositions { get; set; } = [];
 }

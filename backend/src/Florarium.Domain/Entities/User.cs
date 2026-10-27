@@ -12,8 +12,8 @@ public class User
 
     public Role Role { get; set; } = null!;
     public Cart? Cart { get; set; }
-    public ICollection<Address> Addresses { get; set; } = new List<Address>();
-    public ICollection<Order> Orders { get; set; } = new List<Order>();
-    public ICollection<Composition> Compositions { get; set; } = new List<Composition>();
-    public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+    public ICollection<Address> Addresses { get; set; } = [];
+    public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Composition> Compositions { get; set; } = [];
+    public ICollection<Rating> Ratings { get; set; } = [];
 }

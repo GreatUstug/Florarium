@@ -10,5 +10,5 @@ public class CartItem
 
     public Cart Cart { get; set; } = null!;
     public Composition Composition { get; set; } = null!;
-    public ICollection<StockReservation> Reservations { get; set; } = new List<StockReservation>();
+    public ICollection<StockReservation> Reservations { get; set; } = [];
 }
