@@ -19,7 +19,7 @@ public class Composition
     public User Author { get; set; } = null!;
     public Packaging? Packaging { get; set; }
     public Ribbon? Ribbon { get; set; }
-    public ICollection<CompositionItem> Items { get; set; } = new List<CompositionItem>();
-    public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public ICollection<CompositionItem> Items { get; set; } = [];
+    public ICollection<CartItem> CartItems { get; set; } = [];
+    public ICollection<OrderItem> OrderItems { get; set; } = [];
 }
