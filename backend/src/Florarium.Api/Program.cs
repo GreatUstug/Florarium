@@ -27,10 +27,14 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
-        c.IncludeXmlComments(xmlPath);
+        c.IncludeXmlComments(xmlPath);  
+
+    c.CustomSchemaIds(type => type.FullName);
 });
 
 builder.Services.AddScoped<FlowersService>();
+builder.Services.AddScoped<DictionariesService>();
+builder.Services.AddScoped<CompositionsService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")
