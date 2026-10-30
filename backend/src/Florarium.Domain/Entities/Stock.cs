@@ -7,6 +7,8 @@ public class Stock
     public int Reserved { get; set; }
     public DateOnly? BackInStockAt { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    
+    public uint Version { get; set; }
 
     public Flower Flower { get; set; } = null!;
 }

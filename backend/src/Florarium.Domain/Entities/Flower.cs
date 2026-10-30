@@ -15,4 +15,7 @@ public class Flower
     public bool IsActive { get; set; } = true;
 
     public Stock Stock { get; set; } = null!;
+    public ICollection<CompositionItem> CompositionItems { get; set; } = [];
+    public ICollection<SupplyBatch> SupplyBatches { get; set; } = [];
+    public ICollection<StockReservation> StockReservations { get; set; } = [];
 }

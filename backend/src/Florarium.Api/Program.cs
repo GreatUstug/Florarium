@@ -1,5 +1,9 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Florarium.Data;
+using Florarium.Data.Seed;
 using Microsoft.EntityFrameworkCore;
+using Florarium.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +15,26 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
             npgsql.MigrationsAssembly("Florarium.Data"))
         .UseSnakeCaseNamingConvention());
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+
+builder.Services.AddProblemDetails();
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);  
+
+    c.CustomSchemaIds(type => type.FullName);
+});
+
+builder.Services.AddScoped<FlowersService>();
+builder.Services.AddScoped<DictionariesService>();
+builder.Services.AddScoped<CompositionsService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")
@@ -22,12 +43,15 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+    await DbSeeder.SeedAsync(db);
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseCors();
 
