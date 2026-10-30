@@ -93,6 +93,26 @@ dotnet_remove_unnecessary_suppression_exclusions = none
 # Отключение предупреждения ConfigureAwait для асинхронных вызовов
 dotnet_diagnostic.CA2007.severity = none
 
+#### C# Coding Conventions ####
+[*.cs]
+
+# Отключение предупреждения ConfigureAwait для асинхронных вызовов
+dotnet_diagnostic.CA2007.severity = none
+
+# --- ДОБАВЬТЕ ЭТИ СТРОКИ СЮДА ---
+
+# Отключает предупреждение о внутреннем доступе для API проектов (CA1515)
+dotnet_diagnostic.CA1515.severity = none
+
+# Отключает требование использовать System.Uri вместо string для PhotoUrl (CA1056)
+dotnet_diagnostic.CA1056.severity = none
+
+# Отключает требование заменять List<T> на Collection<T> в DTO (CA1002)
+dotnet_diagnostic.CA1002.severity = none
+
+# Отключает требование убирать setter для коллекций в DTO (CA2227)
+dotnet_diagnostic.CA2227.severity = none
+
 # var preferences
 csharp_style_var_elsewhere = false:silent
 csharp_style_var_for_built_in_types = false:silent
