@@ -6,7 +6,7 @@ public class BouquetListItemDto
     public string? Title { get; set; }
     public string? PhotoUrl { get; set; }
     public decimal Price { get; set; }
-    public List<string> Colors { get; set; } = new();
+    public List<string> Colors { get; set; } = [];
     public BouquetAvailabilityDto Availability { get; set; } = new();
     public BouquetRatingDto Rating { get; set; } = new();
 }

@@ -2,11 +2,11 @@ namespace Florarium.Api.Dtos.Compositions;
 
 public class QuoteResponse
 {
-    public List<QuoteItemResponse> Items { get; set; } = new();
+    public List<QuoteItemResponse> Items { get; set; } = [];
     public decimal FlowersTotal { get; set; }
     public decimal PackagingPrice { get; set; }
     public decimal Total { get; set; }
-    public List<QuoteWarningDto> Warnings { get; set; } = new();
+    public List<QuoteWarningDto> Warnings { get; set; } = [];
 }
 
 public class QuoteItemResponse

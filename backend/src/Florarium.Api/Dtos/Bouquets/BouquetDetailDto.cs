@@ -10,7 +10,7 @@ public class BouquetDetailDto
     public string Source { get; set; } = null!;
     public decimal Price { get; set; }
     public PriceBreakdownDto PriceBreakdown { get; set; } = new();
-    public List<BouquetItemDto> Items { get; set; } = new();
+    public List<BouquetItemDto> Items { get; set; } = [];
     public PackagingDto? Packaging { get; set; }
     public RibbonDto? Ribbon { get; set; }
     public BouquetDetailAvailabilityDto Availability { get; set; } = new();
