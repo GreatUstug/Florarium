@@ -1,12 +1,14 @@
 ﻿using Florarium.Domain.Entities;
 using Florarium.Domain.Enums;
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Data.Seed;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext db)
+    public static async Task SeedAsync(AppDbContext db, IPasswordHasher<User> passwordHasher)
     {
         if (await db.Roles.AnyAsync()) return;
 
@@ -16,10 +18,19 @@ public static class DbSeeder
         var clientRole  = new Role { Name = "client",  Rights = 0b0001 };
         db.Roles.AddRange(adminRole, floristRole, clientRole);
 
+        // --- инициализация хэшера ---
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+
         // --- пользователи ---
-        var admin = new User { Role = adminRole, Name = "Администратор", Email = "admin@florarium.local", PasswordHash = "DUMMY_HASH" };
-        var florist = new User { Role = floristRole, Name = "Мария Флорист", Email = "florist@florarium.local", PasswordHash = "DUMMY_HASH" };
-        var client = new User { Role = clientRole, Name = "Иван Петров", Email = "client@florarium.local", PasswordHash = "DUMMY_HASH", Phone = "+7 900 123-45-67" };
+        var admin = new User { Role = adminRole, Name = "Администратор", Email = "admin@florarium.local" };
+        admin.PasswordHash = hasher.HashPassword(admin, "admin123");
+
+        var florist = new User { Role = floristRole, Name = "Мария Флорист", Email = "florist@florarium.local" };
+        florist.PasswordHash = hasher.HashPassword(florist, "florist123");
+
+        var client = new User { Role = clientRole, Name = "Иван Петров", Email = "client@florarium.local", Phone = "+7 900 123-45-67" };
+        client.PasswordHash = hasher.HashPassword(client, "client123");
+
         db.Users.AddRange(admin, florist, client);
 
         // --- цветы + остатки ---

@@ -4,6 +4,8 @@ using Florarium.Data;
 using Florarium.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 using Florarium.Api.Services;
+using Microsoft.AspNetCore.Identity;
+using Florarium.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<FlowersService>();
 builder.Services.AddScoped<DictionariesService>();
 builder.Services.AddScoped<CompositionsService>();
+builder.Services.AddScoped<AuthService>();  
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")
@@ -45,9 +49,14 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<AppDbContext>();
+    
     await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db);
+    
+    var hasher = services.GetRequiredService<IPasswordHasher<User>>();
+    
+    await DbSeeder.SeedAsync(db, hasher);
 }
 
 app.UseExceptionHandler();
