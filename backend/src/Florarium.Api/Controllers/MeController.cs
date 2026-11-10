@@ -36,4 +36,29 @@ public class MeController(AppDbContext db) : ControllerBase
             RegisteredAt = user.RegisteredAt
         });
     }
+
+    [HttpPatch]
+    public async Task<ActionResult<UserResponse>> UpdateMe([FromBody] UpdateMeRequest request, CancellationToken ct)
+    {
+        var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdString, out var userId)) return Unauthorized();
+
+        var user = await _db.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user == null) return Unauthorized();
+
+        if (!string.IsNullOrWhiteSpace(request.Name)) user.Name = request.Name.Trim();
+        if (request.Phone != null) user.Phone = request.Phone.Trim();
+
+        await _db.SaveChangesAsync(ct);
+
+        return Ok(new UserResponse
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email,
+            Phone = user.Phone,
+            Role = user.Role.Name,
+            RegisteredAt = user.RegisteredAt
+        });
+    }
 }
