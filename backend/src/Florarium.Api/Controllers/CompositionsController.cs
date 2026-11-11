@@ -61,7 +61,7 @@ public class CompositionsController(CompositionsService service) : ControllerBas
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (Guid.TryParse(userIdStr, out var parsedId)) userId = parsedId;
 
-        var result = _service.GetByIdAsync(id, userId, ct);
+        var result = await _service.GetByIdAsync(id, userId, ct);
         return result == null ? NotFound() : Ok(result);
     }
 
@@ -74,7 +74,7 @@ public class CompositionsController(CompositionsService service) : ControllerBas
 
         try
         {
-            var result = _service.UpdateAsync(id, request, userId, ct);
+            var result = await _service.UpdateAsync(id, request, userId, ct);
             return Ok(result);
         }
         catch (ApiException ex)
