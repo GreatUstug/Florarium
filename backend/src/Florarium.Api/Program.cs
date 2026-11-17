@@ -42,6 +42,8 @@ builder.Services.AddScoped<BouquetsService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddHostedService<ReservationCleanupService>();
+builder.Services.AddScoped<AddressesService>();
+builder.Services.AddScoped<OrdersService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")

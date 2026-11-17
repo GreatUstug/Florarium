@@ -2,7 +2,7 @@ namespace Florarium.Api.Dtos.Cart;
 
 public class CartResponse
 {
-    public List<CartItemDto> Items { get; set; } = new();
+    public List<CartItemDto> Items { get; set; } = [];
     public int Count { get; set; }
     public decimal Subtotal { get; set; }
     public decimal Total { get; set; }
