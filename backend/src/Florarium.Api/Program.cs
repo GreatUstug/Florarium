@@ -38,7 +38,10 @@ builder.Services.AddScoped<FlowersService>();
 builder.Services.AddScoped<DictionariesService>();
 builder.Services.AddScoped<CompositionsService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<BouquetsService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddHostedService<ReservationCleanupService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")
