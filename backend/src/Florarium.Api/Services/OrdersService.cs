@@ -1,3 +1,4 @@
+using Florarium.Api.Dtos.Cart;
 using Florarium.Api.Dtos.Common;
 using Florarium.Api.Dtos.Orders;
 using Florarium.Api.Exceptions;
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
-public class OrdersService(AppDbContext db)
+public class OrdersService(AppDbContext db, CartService cartService)
 {
     private readonly AppDbContext _db = db;
+
+    private readonly CartService _cartService = cartService;
 
     public async Task<OrderCreatedResponse> CreateOrderAsync(Guid userId, CreateOrderRequest request, CancellationToken ct)
     {
@@ -288,5 +291,43 @@ public class OrdersService(AppDbContext db)
         await tx.CommitAsync(ct);
 
         return (await GetOrderByIdAsync(userId, orderId, ct))!;
+    }
+
+    public async Task<RepeatOrderResponse> RepeatOrderAsync(Guid userId, Guid orderId, CancellationToken ct)
+    {
+        var order = await _db.Orders
+            .AsNoTracking()
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == orderId && o.CustomerId == userId, ct);
+
+        if (order == null)
+            throw new ApiException(404, "not_found", "Заказ не найден");
+
+        var response = new RepeatOrderResponse();
+
+        foreach (var item in order.Items)
+        {
+            try
+            {
+                await _cartService.AddItemAsync(userId, new AddToCartRequest
+                {
+                    CompositionId = item.CompositionId,
+                    Qty = item.Qty
+                }, ct);
+            }
+            catch (ApiException ex) when (ex.Code == "out_of_stock" || ex.Code == "flower_inactive")
+            {
+                var comp = await _db.Compositions.FindAsync([item.CompositionId], ct);
+                response.Skipped.Add(new SkippedItemDto
+                {
+                    CompositionId = item.CompositionId,
+                    Title = comp?.Title,
+                    Reason = ex.Code
+                });
+            }
+        }
+
+        response.Cart = await _cartService.GetCartAsync(userId, ct);
+        return response;
     }
 }
