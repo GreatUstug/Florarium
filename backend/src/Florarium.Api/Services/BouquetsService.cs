@@ -157,4 +157,59 @@ public class BouquetsService(AppDbContext db)
             })
             .FirstOrDefaultAsync(ct);
     }
+
+    public async Task<object> GetRatingsAsync(Guid bouquetId, int page, int pageSize, CancellationToken ct)
+    {
+        var query = _db.Ratings
+            .AsNoTracking()
+            .Where(r => r.OrderItem.CompositionId == bouquetId)
+            .OrderByDescending(r => r.CreatedAt);
+
+        var total = await query.CountAsync(ct);
+
+        var distribution = await _db.Ratings
+            .Where(r => r.OrderItem.CompositionId == bouquetId)
+            .GroupBy(r => r.Stars)
+            .Select(g => new { Stars = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Stars, x => x.Count, ct);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => new
+            {
+                Id = r.Id,
+                Stars = r.Stars,
+                Tags = r.Tags,
+                Text = r.Text,
+                AuthorName = r.Customer.Name.Split(' ')[0],
+                CreatedAt = r.CreatedAt
+            })
+            .ToListAsync(ct);
+
+        var avg = distribution.Count != 0
+            ? distribution.Sum(x => x.Key * x.Value) / (double)total
+            : (double?)null;
+
+        return new
+        {
+            summary = new
+            {
+                avg = avg,
+                count = total,
+                distribution = new
+                {
+                    _1 = distribution.TryGetValue(1, out int value) ? value : 0,
+                    _2 = distribution.TryGetValue(2, out int value1) ? value1 : 0,
+                    _3 = distribution.TryGetValue(3, out int value2) ? value2 : 0,
+                    _4 = distribution.TryGetValue(4, out int value3) ? value3 : 0,
+                    _5 = distribution.TryGetValue(5, out int value4) ? value4 : 0
+                }
+            },
+            items,
+            total,
+            page,
+            pageSize
+        };
+    }
 }

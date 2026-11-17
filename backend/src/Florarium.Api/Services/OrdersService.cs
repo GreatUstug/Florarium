@@ -130,7 +130,7 @@ public class OrdersService(AppDbContext db)
             .Include(o => o.Payments)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.CustomerId == userId, ct);
 
-                if (order == null)
+        if (order == null)
             throw new ApiException(404, "not_found", "Заказ не найден");
 
         if (order.Status == OrderStatus.Paid)
@@ -149,7 +149,7 @@ public class OrdersService(AppDbContext db)
         return (await GetOrderByIdAsync(userId, orderId, ct))!;
     }
 
-        public async Task<PagedResponse<OrderListDto>> GetUserOrdersAsync(Guid userId, string? statusFilter, int page, int pageSize, CancellationToken ct)
+    public async Task<PagedResponse<OrderListDto>> GetUserOrdersAsync(Guid userId, string? statusFilter, int page, int pageSize, CancellationToken ct)
     {
         var query = _db.Orders.AsNoTracking().Where(o => o.CustomerId == userId);
 
@@ -215,7 +215,7 @@ public class OrdersService(AppDbContext db)
             Total = order.Total,
             CanCancel = canCancel,
             CanRepeat = canRepeat,
-            Items = order.Items.Select(i => new OrderItemDto
+            Items = [.. order.Items.Select(i => new OrderItemDto
             {
                 Id = i.Id,
                 Qty = i.Qty,
@@ -229,7 +229,7 @@ public class OrdersService(AppDbContext db)
                     PhotoUrl = i.Composition.PhotoUrl,
                     Source = i.Composition.Source.ToString().ToLower()
                 }
-            }).ToList(),
+            })],
             Delivery = order.Delivery != null ? new OrderDeliveryFullDto
             {
                 RecipientName = order.Delivery.RecipientName,
@@ -239,14 +239,54 @@ public class OrdersService(AppDbContext db)
                 Status = order.Delivery.Status.ToString().ToLower(),
                 DeliveredAt = order.Delivery.DeliveredAt
             } : null!,
-            Payments = order.Payments.Select(p => new OrderPaymentDto
+            Payments = [.. order.Payments.Select(p => new OrderPaymentDto
             {
                 Id = p.Id,
                 Method = p.Method.ToString().ToLower(),
                 Status = p.Status.ToString().ToLower(),
                 Amount = p.Amount,
                 PaidAt = p.PaidAt
-            }).ToList()
+            })]
         };
+    }
+
+    public async Task<OrderDetailDto> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken ct)
+    {
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+        var order = await _db.Orders
+            .Include(o => o.Items).ThenInclude(i => i.Composition).ThenInclude(c => c.Items)
+            .Include(o => o.Payments)
+            .FirstOrDefaultAsync(o => o.Id == orderId && o.CustomerId == userId, ct);
+
+        if (order == null)
+            throw new ApiException(404, "not_found", "Заказ не найден");
+
+        if (order.Status != OrderStatus.New && order.Status != OrderStatus.Paid)
+            throw new ApiException(409, "order_not_cancellable", "Заказ уже нельзя отменить");
+
+        var flowerIds = order.Items.SelectMany(i => i.Composition.Items.Select(ci => ci.FlowerId)).Distinct().ToArray();
+        var stocks = await _db.Stocks
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .ToDictionaryAsync(s => s.FlowerId, ct);
+
+        foreach (var item in order.Items)
+        {
+            foreach (var compItem in item.Composition.Items)
+            {
+                int totalToReturn = compItem.Qty * item.Qty;
+                stocks[compItem.FlowerId].Available += totalToReturn;
+            }
+        }
+
+        order.Status = OrderStatus.Cancelled;
+
+        var payment = order.Payments.FirstOrDefault(p => p.Status == PaymentStatus.Paid);
+        payment?.Status = PaymentStatus.Refunded;
+
+        await _db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+
+        return (await GetOrderByIdAsync(userId, orderId, ct))!;
     }
 }

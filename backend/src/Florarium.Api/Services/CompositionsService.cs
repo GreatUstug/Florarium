@@ -7,6 +7,7 @@ using Florarium.Api.Exceptions;
 using Florarium.Domain.Entities;
 using Florarium.Domain.Enums;
 using Florarium.Api.Dtos.Bouquets;
+using Florarium.Api.Dtos.Common;
 
 namespace Florarium.Api.Services;
 
@@ -176,7 +177,7 @@ public class CompositionsService(AppDbContext db)
                 Flowers = c.Items.Sum(i => i.Qty * i.Flower.PricePerStem),
                 Packaging = c.Packaging?.Price ?? 0
             },
-            Items = c.Items.Select(i => new BouquetItemDto
+            Items = [.. c.Items.Select(i => new BouquetItemDto
             {
                 Qty = i.Qty,
                 LineTotal = i.Qty * i.Flower.PricePerStem,
@@ -189,7 +190,7 @@ public class CompositionsService(AppDbContext db)
                     PhotoUrl = i.Flower.PhotoUrl,
                     PricePerStem = i.Flower.PricePerStem
                 }
-            }).ToList(),
+            })],
             Packaging = c.Packaging != null ? new PackagingDto
             {
                 Id = c.Packaging.Id,
@@ -273,5 +274,55 @@ public class CompositionsService(AppDbContext db)
 
         return await GetByIdAsync(composition.Id, authorId, ct)
             ?? throw new Exception("Состав не найден после обновления");
+    }
+
+    public async Task<PagedResponse<CompositionListDto>> GetUserCompositionsAsync(Guid userId, int page, int pageSize, CancellationToken ct)
+    {
+        var query = _db.Compositions
+            .AsNoTracking()
+            .Where(c => c.AuthorId == userId && c.Source == CompositionSource.Custom)
+            .OrderByDescending(c => c.CreatedAt);
+
+        var total = await query.CountAsync(ct);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new CompositionListDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                PhotoUrl = c.PhotoUrl,
+                Price = c.Price,
+                CreatedAt = c.CreatedAt,
+                FlowersPreview = c.Items.Select(i => i.Flower.Name + " " + i.Qty).ToList(),
+                OrdersCount = c.OrderItems.Count,
+                IsEditable = !c.CartItems.Any() && !c.OrderItems.Any(),
+                Availability = new CompositionAvailabilityDto
+                {
+                    MaxQty = c.Items.Any(i => !i.Flower.IsActive) ? 0 : c.Items.Min(i => (i.Flower.Stock.Available - i.Flower.Stock.Reserved) / i.Qty),
+                    InStock = !c.Items.Any(i => !i.Flower.IsActive) && c.Items.Min(i => (i.Flower.Stock.Available - i.Flower.Stock.Reserved) / i.Qty) > 0
+                }
+            })
+            .ToListAsync(ct);
+
+        return new PagedResponse<CompositionListDto> { Items = items, Total = total, Page = page, PageSize = pageSize };
+    }
+
+    public async Task DeleteCompositionAsync(Guid userId, Guid id, CancellationToken ct)
+    {
+        var comp = await _db.Compositions
+            .Include(c => c.CartItems)
+            .Include(c => c.OrderItems)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
+
+        if (comp == null || comp.Source != CompositionSource.Custom || comp.AuthorId != userId)
+            throw new ApiException(404, "not_found", "Состав не найден");
+
+        if (comp.CartItems.Count != 0 || comp.OrderItems.Count != 0)
+            throw new ApiException(409, "composition_in_use", "Нельзя удалить состав, который используется в корзине или заказах");
+
+        _db.Compositions.Remove(comp);
+        await _db.SaveChangesAsync(ct);
     }
 }

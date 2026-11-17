@@ -1,5 +1,6 @@
 using Florarium.Api.Dtos.Bouquets;
 using Florarium.Api.Services;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
@@ -30,5 +31,12 @@ public class BouquetsController(BouquetsService bouquets) : ControllerBase
     {
         var result = await _bouquets.GetByIdAsync(id, ct);
         return result == null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("{id:guid}/ratings")]
+    public async Task<IActionResult> GetRatings(Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 12, CancellationToken ct = default)
+    {
+        var result = await _bouquets.GetRatingsAsync(id, page, pageSize, ct);
+        return Ok(result);
     }
 }
