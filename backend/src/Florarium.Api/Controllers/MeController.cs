@@ -1,4 +1,6 @@
 using Florarium.Api.Dtos.Auth;
+using Florarium.Api.Dtos.Me;
+using Florarium.Api.Services;
 using Florarium.Data;
 
 using Microsoft.AspNetCore.Authorization;
@@ -10,9 +12,10 @@ namespace Florarium.Api.Controllers;
 [ApiController]
 [Route("api/me")]
 [Authorize]
-public class MeController(AppDbContext db) : ControllerBase
+public class MeController(AppDbContext db, AddressesService addressesService) : ControllerBase
 {
     private readonly AppDbContext _db = db;
+    private readonly AddressesService _addressesService = addressesService;
 
     [HttpGet]
     public async Task<ActionResult<UserResponse>> GetMe(CancellationToken ct)
@@ -61,5 +64,22 @@ public class MeController(AppDbContext db) : ControllerBase
             Role = user.Role.Name,
             RegisteredAt = user.RegisteredAt
         });
+    }
+
+    [HttpGet("addresses")]
+    public async Task<ActionResult<List<AddressDto>>> GetAddresses(CancellationToken ct)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        return Ok(await _addressesService.GetUserAddressesAsync(userId, ct));
+    }
+
+    [HttpPost("addresses")]
+    public async Task<ActionResult<AddressDto>> CreateAdress([FromBody] CreateAddressRequest request, CancellationToken ct)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        var result = await _addressesService.CreateAddressAsync(userId, request, ct);
+        return StatusCode(201, result);
     }
 }
