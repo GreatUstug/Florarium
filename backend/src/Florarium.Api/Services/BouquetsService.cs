@@ -1,13 +1,13 @@
 using System.Collections.Immutable;
-using System.Drawing;
 
 using Florarium.Api.Dtos.Bouquets;
 using Florarium.Api.Dtos.Common;
 using Florarium.Data;
-using Florarium.Domain.Entities;
 using Florarium.Domain.Enums;
 
 using Microsoft.EntityFrameworkCore;
+
+namespace Florarium.Api.Services;
 
 public class BouquetsService(AppDbContext db)
 {
@@ -62,7 +62,7 @@ public class BouquetsService(AppDbContext db)
                     .Select(i => i.Flower.ColorFamily!)
                     .Distinct()
                     .ToList(),
-                
+
 
 
                 // Считаем maxQty: берем минимальное значение (Available - Reserved) / Qty
@@ -150,9 +150,9 @@ public class BouquetsService(AppDbContext db)
                 Rating = new BouquetRatingDto
                 {
                     Count = c.OrderItems.Count(oi => oi.Rating != null),
-                    Avg = c.OrderItems
-                        .Where(oi => oi.Rating != null)
-                        .Average(oi => (double?)oi.Rating!.Stars)
+                    Avg = c.OrderItems.Any(oi => oi.Rating != null)
+                        ? c.OrderItems.Where(oi => oi.Rating != null).Average(oi => (double?)oi.Rating!.Stars)
+                        : null
                 }
             })
             .FirstOrDefaultAsync(ct);

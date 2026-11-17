@@ -1,7 +1,11 @@
 using Florarium.Api.Dtos.Bouquets;
-
+using Florarium.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
+namespace Florarium.Api.Controllers;
+
+[ApiController]
+[Route("api/bouquets")]
 public class BouquetsController(BouquetsService bouquets) : ControllerBase
 {
     private readonly BouquetsService _bouquets = bouquets;
