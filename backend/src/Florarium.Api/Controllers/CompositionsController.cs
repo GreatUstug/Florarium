@@ -84,7 +84,30 @@ public class CompositionsController(CompositionsService service) : ControllerBas
                 Title = ex.Message,
                 Status = ex.StatusCode,
                 Extensions = { ["code"] = ex.Code }
-            }); 
+            });
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        try
+        {
+            await _service.DeleteCompositionAsync(userId, id, ct);
+            return NoContent();
+        }
+        catch (ApiException ex)
+        {
+            return StatusCode(ex.StatusCode, new ProblemDetails 
+            { 
+                Title = ex.Message, 
+                Status = ex.StatusCode, 
+                Extensions = { ["code"] = ex.Code } 
+            });
         }
     }
 }

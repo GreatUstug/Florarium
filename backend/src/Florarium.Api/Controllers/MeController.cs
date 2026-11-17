@@ -1,4 +1,6 @@
 using Florarium.Api.Dtos.Auth;
+using Florarium.Api.Dtos.Common;
+using Florarium.Api.Dtos.Compositions;
 using Florarium.Api.Dtos.Me;
 using Florarium.Api.Services;
 using Florarium.Data;
@@ -12,10 +14,11 @@ namespace Florarium.Api.Controllers;
 [ApiController]
 [Route("api/me")]
 [Authorize]
-public class MeController(AppDbContext db, AddressesService addressesService) : ControllerBase
+public class MeController(AppDbContext db, AddressesService addressesService, CompositionsService compositionsService) : ControllerBase
 {
     private readonly AppDbContext _db = db;
     private readonly AddressesService _addressesService = addressesService;
+    private readonly CompositionsService _compositionsService = compositionsService;
 
     [HttpGet]
     public async Task<ActionResult<UserResponse>> GetMe(CancellationToken ct)
@@ -81,5 +84,16 @@ public class MeController(AppDbContext db, AddressesService addressesService) : 
         if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
         var result = await _addressesService.CreateAddressAsync(userId, request, ct);
         return StatusCode(201, result);
+    }
+
+    [HttpGet("compositions")]
+    public async Task<ActionResult<PagedResponse<CompositionListDto>>> GetMyCompositions(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 12,
+    CancellationToken ct = default)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        return Ok(await _compositionsService.GetUserCompositionsAsync(userId, page, pageSize, ct));
     }
 }

@@ -44,6 +44,7 @@ builder.Services.AddScoped<CartService>();
 builder.Services.AddHostedService<ReservationCleanupService>();
 builder.Services.AddScoped<AddressesService>();
 builder.Services.AddScoped<OrdersService>();
+builder.Services.AddScoped<RatingsService>();
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins("http://localhost:5173", "http://localhost:3000")

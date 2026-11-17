@@ -1,5 +1,6 @@
 using System.Security.Claims;
 
+using Florarium.Api.Dtos.Cart;
 using Florarium.Api.Dtos.Orders;
 using Florarium.Api.Exceptions;
 using Florarium.Api.Services;
@@ -68,5 +69,44 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
 
         var result = await _ordersService.GetOrderByIdAsync(userId, id, ct);
         return result == null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    public async Task<ActionResult<OrderDetailDto>> Cancel(Guid id, CancellationToken ct)
+    {
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        try
+        {
+            var result = await _ordersService.CancelOrderAsync(userId, id, ct);
+            return Ok(result);
+        }
+        catch (ApiException ex)
+        {
+            return StatusCode(ex.StatusCode, new ProblemDetails
+            {
+                Title = ex.Message,
+                Status = ex.StatusCode,
+                Extensions = { ["code"] = ex.Code }
+            });
+        }
+    }
+
+    [HttpPost("{id:guid}/repeat")]
+    public async Task<ActionResult<RepeatOrderResponse>> Repeat(Guid id, CancellationToken ct)
+    {
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        try
+        {
+            var result = await _ordersService.RepeatOrderAsync(userId, id, ct);
+            return Ok(result);
+        }
+        catch (ApiException ex)
+        {
+            return StatusCode(ex.StatusCode, new ProblemDetails { Title = ex.Message, Status = ex.StatusCode, Extensions = { ["code"] = ex.Code } });
+        }
     }
 }
