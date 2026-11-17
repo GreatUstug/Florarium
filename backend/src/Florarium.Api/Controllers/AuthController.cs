@@ -1,6 +1,8 @@
 using System.Security.Claims;
+
 using Florarium.Api.Dtos.Auth;
 using Florarium.Api.Services;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +27,7 @@ public class AuthController(AuthService authService) : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            var problem = new ProblemDetails {Title = ex.Message, Status = 409};
+            var problem = new ProblemDetails { Title = ex.Message, Status = 409 };
             problem.Extensions.Add("code", "email_taken");
             return Conflict(problem);
         }
@@ -38,7 +40,7 @@ public class AuthController(AuthService authService) : ControllerBase
 
         if (user == null)
         {
-            var problem = new ProblemDetails {Title = "Неверный email или пароль", Status = 401};
+            var problem = new ProblemDetails { Title = "Неверный email или пароль", Status = 401 };
             problem.Extensions.Add("code", "invalid_credentials");
             return Unauthorized(problem);
         }

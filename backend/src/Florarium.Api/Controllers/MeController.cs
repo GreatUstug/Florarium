@@ -1,5 +1,6 @@
 using Florarium.Api.Dtos.Auth;
 using Florarium.Data;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,14 +28,14 @@ public class MeController(AppDbContext db) : ControllerBase
         return user == null
             ? Unauthorized()
             : Ok(new UserResponse
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            Phone = user.Phone,
-            Role = user.Role.Name,
-            RegisteredAt = user.RegisteredAt
-        });
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Role = user.Role.Name,
+                RegisteredAt = user.RegisteredAt
+            });
     }
 
     [HttpPatch]
