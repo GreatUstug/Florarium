@@ -1,7 +1,9 @@
 using System.Security.Claims;
+
 using Florarium.Api.Dtos.Cart;
 using Florarium.Api.Exceptions;
 using Florarium.Api.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,14 +46,7 @@ public class CartController(CartService cartService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CartResponse>> AddItem([FromBody] AddToCartRequest request, CancellationToken ct)
     {
-        try
-        {
-            return Ok(await _cartService.AddItemAsync(GetUserId(), request, ct));
-        }
-        catch (ApiException ex)
-        {
-            return HandleApiException(ex);
-        }
+        return Ok(await _cartService.AddItemAsync(GetUserId(), request, ct));
     }
 
     /// <summary>Изменяет количество позиции корзины.</summary>
@@ -70,14 +65,7 @@ public class CartController(CartService cartService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CartResponse>> UpdateQty(Guid id, [FromBody] UpdateCartItemRequest request, CancellationToken ct)
     {
-        try
-        {
-            return Ok(await _cartService.UpdateItemQtyAsync(GetUserId(), id, request.Qty, ct));
-        }
-        catch (ApiException ex)
-        {
-            return HandleApiException(ex);
-        }
+        return Ok(await _cartService.UpdateItemQtyAsync(GetUserId(), id, request.Qty, ct));
     }
 
     /// <summary>Удаляет одну позицию из корзины.</summary>
@@ -93,14 +81,7 @@ public class CartController(CartService cartService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CartResponse>> RemoveItem(Guid id, CancellationToken ct)
     {
-        try
-        {
-            return Ok(await _cartService.RemoveItemAsync(GetUserId(), id, ct));
-        }
-        catch (ApiException ex)
-        {
-            return HandleApiException(ex);
-        }
+        return Ok(await _cartService.RemoveItemAsync(GetUserId(), id, ct));
     }
 
     /// <summary>Полностью очищает корзину.</summary>

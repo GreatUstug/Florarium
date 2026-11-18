@@ -35,23 +35,10 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<OrderCreatedResponse>> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _ordersService.CreateOrderAsync(userId, request, ct);
-            return StatusCode(201, result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails
-            {
-                Title = ex.Message,
-                Status = ex.StatusCode,
-                Extensions = { ["code"] = ex.Code }
-            });
-        }
+        var result = await _ordersService.CreateOrderAsync(userId, request, ct);
+        return StatusCode(201, result);
     }
 
     /// <summary>Оформляет платеж для заказа.</summary>
@@ -71,23 +58,10 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<OrderDetailDto>> Pay(Guid id, CancellationToken ct)
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _ordersService.PayOrderAsync(userId, id, ct);
-            return Ok(result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails
-            {
-                Title = ex.Message,
-                Status = ex.StatusCode,
-                Extensions = { ["code"] = ex.Code }
-            });
-        }
+        var result = await _ordersService.PayOrderAsync(userId, id, ct);
+        return Ok(result);
     }
 
     /// <summary>Возвращает подробную информацию о заказе.</summary>
@@ -103,8 +77,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OrderDetailDto>> GetById(Guid id, CancellationToken ct)
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
         var result = await _ordersService.GetOrderByIdAsync(userId, id, ct);
         return result == null ? NotFound() : Ok(result);
@@ -125,23 +98,10 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<OrderDetailDto>> Cancel(Guid id, CancellationToken ct)
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _ordersService.CancelOrderAsync(userId, id, ct);
-            return Ok(result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails
-            {
-                Title = ex.Message,
-                Status = ex.StatusCode,
-                Extensions = { ["code"] = ex.Code }
-            });
-        }
+        var result = await _ordersService.CancelOrderAsync(userId, id, ct);
+        return Ok(result);
     }
 
     /// <summary>Повторно добавляет доступные позиции заказа в корзину.</summary>
@@ -157,17 +117,15 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RepeatOrderResponse>> Repeat(Guid id, CancellationToken ct)
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _ordersService.RepeatOrderAsync(userId, id, ct);
-            return Ok(result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails { Title = ex.Message, Status = ex.StatusCode, Extensions = { ["code"] = ex.Code } });
-        }
+        var result = await _ordersService.RepeatOrderAsync(userId, id, ct);
+        return Ok(result);
+    }
+
+    private bool TryGetUserId(out Guid userId)
+    {
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdStr, out userId);
     }
 }

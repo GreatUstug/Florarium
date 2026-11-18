@@ -29,18 +29,9 @@ public class AuthController(AuthService authService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-        try
-        {
-            var user = await _authService.RegisterAsync(request, ct);
-            await SignInUserAsync(user.Id, user.Name, user.Role);
-            return StatusCode(201, user);
-        }
-        catch (InvalidOperationException ex)
-        {
-            var problem = new ProblemDetails { Title = ex.Message, Status = 409 };
-            problem.Extensions.Add("code", "email_taken");
-            return Conflict(problem);
-        }
+        var user = await _authService.RegisterAsync(request, ct);
+        await SignInUserAsync(user.Id, user.Name, user.Role);
+        return StatusCode(201, user);
     }
 
     /// <summary>Выполняет вход по email и паролю.</summary>

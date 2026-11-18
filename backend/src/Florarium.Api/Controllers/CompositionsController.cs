@@ -60,20 +60,9 @@ public class CompositionsController(CompositionsService service) : ControllerBas
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _service.CreateAsync(request, userId, ct);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails
-            {
-                Title = ex.Message,
-                Status = ex.StatusCode,
-                Extensions = { ["code"] = ex.Code }
-            });
-        }
+        var result = await _service.CreateAsync(request, userId, ct);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+
     }
 
     /// <summary>Возвращает состав букета по идентификатору.</summary>
@@ -118,20 +107,8 @@ public class CompositionsController(CompositionsService service) : ControllerBas
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-        try
-        {
-            var result = await _service.UpdateAsync(id, request, userId, ct);
-            return Ok(result);
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails
-            {
-                Title = ex.Message,
-                Status = ex.StatusCode,
-                Extensions = { ["code"] = ex.Code }
-            });
-        }
+        var result = await _service.UpdateAsync(id, request, userId, ct);
+        return Ok(result);
     }
 
     /// <summary>Удаляет пользовательский состав букета.</summary>
@@ -154,19 +131,7 @@ public class CompositionsController(CompositionsService service) : ControllerBas
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-        try
-        {
-            await _service.DeleteCompositionAsync(userId, id, ct);
-            return NoContent();
-        }
-        catch (ApiException ex)
-        {
-            return StatusCode(ex.StatusCode, new ProblemDetails 
-            { 
-                Title = ex.Message, 
-                Status = ex.StatusCode, 
-                Extensions = { ["code"] = ex.Code } 
-            });
-        }
+        await _service.DeleteCompositionAsync(userId, id, ct);
+        return NoContent();
     }
 }

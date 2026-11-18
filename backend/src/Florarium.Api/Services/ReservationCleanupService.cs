@@ -46,7 +46,7 @@ public class ReservationCleanupService(IServiceProvider services, ILogger<Reserv
         var flowerIds = expired.Select(r => r.FlowerId).Distinct().ToArray();
 
         var stocks = await db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
             .ToDictionaryAsync(s => s.FlowerId, ct);
 
         foreach (var res in expired)
