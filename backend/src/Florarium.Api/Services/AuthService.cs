@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
-public class AuthService(AppDbContext db)
+public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
 {
     private readonly AppDbContext _db = db;
-    private readonly PasswordHasher<User> _passwordHasher = new();
+    private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
 
     public async Task<UserResponse> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
@@ -20,7 +20,7 @@ public class AuthService(AppDbContext db)
         if (await _db.Users.AnyAsync(u => u.Email == email, ct))
             throw new ApiException(409, "email_taken", "Пользователь с таким email уже существует");
 
-        var clientRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "client", ct) 
+        var clientRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "client", ct)
             ?? throw new Exception("Роль 'client' не найдена в БД");
 
         var user = new User
