@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Просмотр каталога букетов и отзывов.</summary>
 [ApiController]
 [Route("api/bouquets")]
-/// <summary>Просмотр каталога букетов и отзывов.</summary>
 public class BouquetsController(BouquetsService bouquets) : ControllerBase
 {
     private readonly BouquetsService _bouquets = bouquets;
 
-    [HttpGet]
     /// <summary>Возвращает постраничный каталог букетов с фильтрами.</summary>
     /// <param name="color">Фильтр по цветовой группе.</param>
     /// <param name="priceFrom">Минимальная цена букета.</param>
@@ -25,6 +24,7 @@ public class BouquetsController(BouquetsService bouquets) : ControllerBase
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Страница карточек букетов.</returns>
     /// <response code="200">Каталог успешно получен.</response>
+    [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<BouquetListItemDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCatalog(
         [FromQuery] string[]? color,
@@ -40,13 +40,13 @@ public class BouquetsController(BouquetsService bouquets) : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:guid}")]
     /// <summary>Возвращает подробную карточку букета.</summary>
     /// <param name="id">Идентификатор букета.</param>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Карточка букета или ответ об отсутствии.</returns>
     /// <response code="200">Букет найден.</response>
     /// <response code="404">Букет с указанным идентификатором не найден.</response>
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(BouquetDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BouquetDetailDto>> GetById(Guid id, CancellationToken ct)
@@ -55,7 +55,6 @@ public class BouquetsController(BouquetsService bouquets) : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
-    [HttpGet("{id:guid}/ratings")]
     /// <summary>Возвращает постраничный список отзывов букета.</summary>
     /// <param name="id">Идентификатор букета.</param>
     /// <param name="page">Номер страницы.</param>
@@ -63,6 +62,7 @@ public class BouquetsController(BouquetsService bouquets) : ControllerBase
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Отзывы и агрегированные данные рейтинга.</returns>
     /// <response code="200">Отзывы успешно получены.</response>
+    [HttpGet("{id:guid}/ratings")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRatings(Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 12, CancellationToken ct = default)
     {

@@ -4,14 +4,14 @@ namespace Florarium.Api.Controllers;
 
 [ApiController]
 [Route("api/delivery")]
-/// <summary>Получение доступных временных интервалов доставки.</summary>
 public class DeliveryController : ControllerBase
 {
-    [HttpGet("slots")]
+/// <summary>Получение доступных временных интервалов доставки.</summary>
     /// <summary>Возвращает стандартные интервалы доставки для даты.</summary>
     /// <param name="date">Дата доставки; если не указана, используется текущая дата UTC.</param>
     /// <returns>Дата и доступные временные слоты.</returns>
     /// <response code="200">Слоты успешно получены.</response>
+    [HttpGet("slots")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetSlots([FromQuery] DateOnly? date)
     {

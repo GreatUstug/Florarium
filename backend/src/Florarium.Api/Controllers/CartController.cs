@@ -7,21 +7,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Управление корзиной авторизованного пользователя.</summary>
+/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 [ApiController]
 [Route("api/cart")]
 [Authorize]
-/// <summary>Управление корзиной авторизованного пользователя.</summary>
-/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 public class CartController(CartService cartService) : ControllerBase
 {
     private readonly CartService _cartService = cartService;
 
-    [HttpGet]
     /// <summary>Возвращает текущее содержимое корзины.</summary>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Позиции корзины, итоговую сумму и срок резерва.</returns>
     /// <response code="200">Корзина получена.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [HttpGet]
     [ProducesResponseType(typeof(CartResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<CartResponse>> Get(CancellationToken ct)
@@ -29,7 +29,6 @@ public class CartController(CartService cartService) : ControllerBase
         return Ok(await _cartService.GetCartAsync(GetUserId(), ct));
     }
 
-    [HttpPost("items")]
     /// <summary>Добавляет состав букета в корзину.</summary>
     /// <param name="request">Идентификатор состава и количество.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -38,6 +37,7 @@ public class CartController(CartService cartService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Состав не найден.</response>
     /// <response code="409">Состав снят с продажи или недостаточно товара на складе.</response>
+    [HttpPost("items")]
     [ProducesResponseType(typeof(CartResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -54,7 +54,6 @@ public class CartController(CartService cartService) : ControllerBase
         }
     }
 
-    [HttpPut("items/{id:guid}")]
     /// <summary>Изменяет количество позиции корзины.</summary>
     /// <param name="id">Идентификатор позиции корзины.</param>
     /// <param name="request">Новое количество.</param>
@@ -64,6 +63,7 @@ public class CartController(CartService cartService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Позиция не найдена.</response>
     /// <response code="409">Недостаточно остатка или состав недоступен.</response>
+    [HttpPut("items/{id:guid}")]
     [ProducesResponseType(typeof(CartResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -80,7 +80,6 @@ public class CartController(CartService cartService) : ControllerBase
         }
     }
 
-    [HttpDelete("items/{id:guid}")]
     /// <summary>Удаляет одну позицию из корзины.</summary>
     /// <param name="id">Идентификатор позиции корзины.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -88,6 +87,7 @@ public class CartController(CartService cartService) : ControllerBase
     /// <response code="200">Позиция удалена.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Позиция не найдена.</response>
+    [HttpDelete("items/{id:guid}")]
     [ProducesResponseType(typeof(CartResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -103,12 +103,12 @@ public class CartController(CartService cartService) : ControllerBase
         }
     }
 
-    [HttpDelete]
     /// <summary>Полностью очищает корзину.</summary>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Пустой ответ.</returns>
     /// <response code="204">Корзина очищена.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Clear(CancellationToken ct)

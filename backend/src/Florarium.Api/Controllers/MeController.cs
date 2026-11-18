@@ -11,23 +11,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Профиль пользователя, адреса доставки и индивидуальные составы.</summary>
+/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 [ApiController]
 [Route("api/me")]
 [Authorize]
-/// <summary>Профиль пользователя, адреса доставки и индивидуальные составы.</summary>
-/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 public class MeController(AppDbContext db, AddressesService addressesService, CompositionsService compositionsService) : ControllerBase
 {
     private readonly AppDbContext _db = db;
     private readonly AddressesService _addressesService = addressesService;
     private readonly CompositionsService _compositionsService = compositionsService;
 
-    [HttpGet]
     /// <summary>Возвращает профиль текущего пользователя.</summary>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Данные профиля.</returns>
     /// <response code="200">Профиль получен.</response>
     /// <response code="401">Сессия недействительна или пользователь не найден.</response>
+    [HttpGet]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserResponse>> GetMe(CancellationToken ct)
@@ -53,13 +53,13 @@ public class MeController(AppDbContext db, AddressesService addressesService, Co
             });
     }
 
-    [HttpPatch]
     /// <summary>Обновляет имя и телефон профиля.</summary>
     /// <param name="request">Новые необязательные поля профиля.</param>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Обновленный профиль.</returns>
     /// <response code="200">Профиль обновлен.</response>
     /// <response code="401">Сессия недействительна или пользователь не найден.</response>
+    [HttpPatch]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserResponse>> UpdateMe([FromBody] UpdateMeRequest request, CancellationToken ct)
@@ -86,12 +86,12 @@ public class MeController(AppDbContext db, AddressesService addressesService, Co
         });
     }
 
-    [HttpGet("addresses")]
     /// <summary>Возвращает сохраненные адреса доставки пользователя.</summary>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Список адресов.</returns>
     /// <response code="200">Адреса получены.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [HttpGet("addresses")]
     [ProducesResponseType(typeof(List<AddressDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<AddressDto>>> GetAddresses(CancellationToken ct)
@@ -101,13 +101,13 @@ public class MeController(AppDbContext db, AddressesService addressesService, Co
         return Ok(await _addressesService.GetUserAddressesAsync(userId, ct));
     }
 
-    [HttpPost("addresses")]
     /// <summary>Создает новый адрес доставки пользователя.</summary>
     /// <param name="request">Данные адреса.</param>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Созданный адрес.</returns>
     /// <response code="201">Адрес создан.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [HttpPost("addresses")]
     [ProducesResponseType(typeof(AddressDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AddressDto>> CreateAdress([FromBody] CreateAddressRequest request, CancellationToken ct)
@@ -118,7 +118,6 @@ public class MeController(AppDbContext db, AddressesService addressesService, Co
         return StatusCode(201, result);
     }
 
-    [HttpGet("compositions")]
     /// <summary>Возвращает индивидуальные композиции текущего пользователя.</summary>
     /// <param name="page">Номер страницы.</param>
     /// <param name="pageSize">Размер страницы.</param>
@@ -126,6 +125,7 @@ public class MeController(AppDbContext db, AddressesService addressesService, Co
     /// <returns>Постраничный список составов.</returns>
     /// <response code="200">Составы получены.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [HttpGet("compositions")]
     [ProducesResponseType(typeof(PagedResponse<CompositionListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedResponse<CompositionListDto>>> GetMyCompositions(

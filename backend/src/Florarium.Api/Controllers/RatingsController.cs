@@ -7,15 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Отзывы покупателей на купленные позиции заказов.</summary>
 [ApiController]
 [Route("api/order-items")]
 [Authorize]
-/// <summary>Отзывы покупателей на купленные позиции заказов.</summary>
 public class RatingsController(RatingsService ratingsService) : ControllerBase
 {
     private readonly RatingsService _ratingsService = ratingsService;
 
-    [HttpPost("{id:guid}/rating")]
     /// <summary>Добавляет отзыв на доставленную позицию заказа.</summary>
     /// <remarks>Заказ должен быть доставлен, позиция не должна иметь предыдущий отзыв.</remarks>
     /// <param name="id">Идентификатор позиции заказа.</param>
@@ -27,6 +26,7 @@ public class RatingsController(RatingsService ratingsService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Позиция заказа не найдена.</response>
     /// <response code="409">Заказ не доставлен или отзыв уже оставлен.</response>
+    [HttpPost("{id:guid}/rating")]
     [ProducesResponseType(typeof(RatingDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

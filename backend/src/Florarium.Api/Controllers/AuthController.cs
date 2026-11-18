@@ -10,14 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Регистрация, вход и выход из учетной записи.</summary>
 [ApiController]
 [Route("api/auth")]
-/// <summary>Регистрация, вход и выход из учетной записи.</summary>
 public class AuthController(AuthService authService) : ControllerBase
 {
     private readonly AuthService _authService = authService;
 
-    [HttpPost("register")]
     /// <summary>Регистрирует нового пользователя.</summary>
     /// <remarks>При успешной регистрации создается cookie-сессия. Email должен быть уникальным.</remarks>
     /// <param name="request">Данные нового пользователя.</param>
@@ -25,6 +24,7 @@ public class AuthController(AuthService authService) : ControllerBase
     /// <returns>Созданный профиль пользователя.</returns>
     /// <response code="201">Пользователь создан и выполнен вход.</response>
     /// <response code="409">Пользователь с указанным email уже существует.</response>
+    [HttpPost("register")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
@@ -43,7 +43,6 @@ public class AuthController(AuthService authService) : ControllerBase
         }
     }
 
-    [HttpPost("login")]
     /// <summary>Выполняет вход по email и паролю.</summary>
     /// <remarks>Успешный вход устанавливает защищенную cookie-сессию.</remarks>
     /// <param name="request">Учетные данные пользователя.</param>
@@ -51,6 +50,7 @@ public class AuthController(AuthService authService) : ControllerBase
     /// <returns>Профиль авторизованного пользователя.</returns>
     /// <response code="200">Вход выполнен.</response>
     /// <response code="401">Email или пароль неверны.</response>
+    [HttpPost("login")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
@@ -68,13 +68,13 @@ public class AuthController(AuthService authService) : ControllerBase
         return Ok(_authService.MapToResponse(user));
     }
 
-    [Authorize]
-    [HttpPost("logout")]
     /// <summary>Завершает cookie-сессию пользователя.</summary>
     /// <param name="ct">Токен отмены операции.</param>
     /// <returns>Результат выхода.</returns>
     /// <response code="204">Сессия завершена.</response>
     /// <response code="401">Пользователь не авторизован.</response>
+    [Authorize]
+    [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout()

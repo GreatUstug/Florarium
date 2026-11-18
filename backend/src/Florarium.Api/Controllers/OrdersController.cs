@@ -10,16 +10,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Florarium.Api.Controllers;
 
+/// <summary>Создание и управление заказами авторизованного пользователя.</summary>
+/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 [ApiController]
 [Route("api/orders")]
 [Authorize]
-/// <summary>Создание и управление заказами авторизованного пользователя.</summary>
-/// <remarks>Все методы требуют cookie-аутентификации.</remarks>
 public class OrdersController(OrdersService ordersService) : ControllerBase
 {
     private readonly OrdersService _ordersService = ordersService;
 
-    [HttpPost]
     /// <summary>Создает заказ из текущей корзины.</summary>
     /// <remarks>Корзина должна быть непустой, адрес существовать, а товары иметь остатки.</remarks>
     /// <param name="request">Адрес, время доставки и способ оплаты.</param>
@@ -29,6 +28,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     /// <response code="400">Адрес, параметры доставки или данные корзины некорректны.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="409">Корзина пуста, товар недоступен или недостаточно остатков.</response>
+    [HttpPost]
     [ProducesResponseType(typeof(OrderCreatedResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -54,7 +54,6 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
         }
     }
 
-    [HttpPost("{id:guid}/payments")]
     /// <summary>Оформляет платеж для заказа.</summary>
     /// <param name="id">Идентификатор заказа.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -64,6 +63,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Заказ не найден.</response>
     /// <response code="409">Заказ уже оплачен.</response>
+    [HttpPost("{id:guid}/payments")]
     [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -90,7 +90,6 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
         }
     }
 
-    [HttpGet("{id:guid}")]
     /// <summary>Возвращает подробную информацию о заказе.</summary>
     /// <param name="id">Идентификатор заказа.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -98,6 +97,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     /// <response code="200">Заказ найден.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Заказ не найден или не принадлежит пользователю.</response>
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -110,7 +110,6 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
-    [HttpPost("{id:guid}/cancel")]
     /// <summary>Отменяет заказ, если он еще не передан в доставку.</summary>
     /// <param name="id">Идентификатор заказа.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -119,6 +118,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Заказ не найден.</response>
     /// <response code="409">Заказ уже нельзя отменить.</response>
+    [HttpPost("{id:guid}/cancel")]
     [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -144,7 +144,6 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
         }
     }
 
-    [HttpPost("{id:guid}/repeat")]
     /// <summary>Повторно добавляет доступные позиции заказа в корзину.</summary>
     /// <param name="id">Идентификатор исходного заказа.</param>
     /// <param name="ct">Токен отмены операции.</param>
@@ -152,6 +151,7 @@ public class OrdersController(OrdersService ordersService) : ControllerBase
     /// <response code="200">Повторение обработано; недоступные позиции возвращены отдельно.</response>
     /// <response code="401">Пользователь не авторизован.</response>
     /// <response code="404">Заказ не найден.</response>
+    [HttpPost("{id:guid}/repeat")]
     [ProducesResponseType(typeof(RepeatOrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
