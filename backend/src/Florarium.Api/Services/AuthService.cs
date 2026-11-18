@@ -39,7 +39,7 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
         return MapToResponse(user);
     }
 
-    public async Task<User> VerifyCredentialsAsync(string email, string password, CancellationToken ct)
+    public async Task<User?> VerifyCredentialsAsync(string email, string password, CancellationToken ct)
     {
         email = email.Trim().ToLowerInvariant();
 
@@ -47,14 +47,11 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Email == email, ct);
 
-        if (user == null) return null!;
+        if (user == null) return null;
 
         var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
-        if (result == PasswordVerificationResult.Failed)
-            return null!;
-
-        return user;
+        return result == PasswordVerificationResult.Failed ? null : user;
     }
 
     public UserResponse MapToResponse(User user)
