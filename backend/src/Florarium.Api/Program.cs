@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Florarium.Api.Exceptions;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,10 +29,17 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-        c.IncludeXmlComments(xmlPath);
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Florarium API",
+        Version = "v1",
+        Description = "API цветочного магазина Florarium: каталог букетов и цветов, составление букетов, корзина, заказы и отзывы."
+    });
+
+    foreach (var xmlFile in Directory.GetFiles(AppContext.BaseDirectory, "*.xml"))
+    {
+        c.IncludeXmlComments(xmlFile, includeControllerXmlComments: true);
+    }
 
     c.CustomSchemaIds(type => type.FullName);
 });

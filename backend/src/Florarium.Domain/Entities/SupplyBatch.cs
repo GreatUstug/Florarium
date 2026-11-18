@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Партия поступления цветка с количеством и сроком запаса.</summary>
 public class SupplyBatch
 {
     public Guid Id { get; set; }

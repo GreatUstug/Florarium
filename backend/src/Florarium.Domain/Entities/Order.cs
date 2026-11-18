@@ -2,6 +2,7 @@
 
 namespace Florarium.Domain.Entities;
 
+/// <summary>Заказ пользователя со статусом, стоимостью и связанными доставкой и платежами.</summary>
 public class Order
 {
     public Guid Id { get; set; }

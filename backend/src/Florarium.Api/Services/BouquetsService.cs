@@ -9,10 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис BouquetsService.</summary>
 public class BouquetsService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет GetCatalogAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<PagedResponse<BouquetListItemDto>> GetCatalogAsync(
         string[]? colors, decimal? priceFrom, decimal? priceTo,
         bool inStock, string sort, int page, int pageSize, CancellationToken ct)
@@ -92,6 +95,8 @@ public class BouquetsService(AppDbContext db)
         return new PagedResponse<BouquetListItemDto> { Items = items, Total = total, Page = page, PageSize = pageSize };
     }
 
+    /// <summary>Выполняет GetByIdAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<BouquetDetailDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         return await _db.Compositions
@@ -158,6 +163,8 @@ public class BouquetsService(AppDbContext db)
             .FirstOrDefaultAsync(ct);
     }
 
+    /// <summary>Выполняет GetRatingsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<object> GetRatingsAsync(Guid bouquetId, int page, int pageSize, CancellationToken ct)
     {
         var query = _db.Ratings

@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис DictionariesService.</summary>
 public class DictionariesService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет GetPackagingsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<IReadOnlyList<PackagingDto>> GetPackagingsAsync(CancellationToken ct)
     {
         return await _db.Packagings
@@ -17,6 +20,8 @@ public class DictionariesService(AppDbContext db)
             .ToListAsync(ct);
     }
 
+    /// <summary>Выполняет GetRibbonsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<IReadOnlyList<RibbonDto>> GetRibbonsAsync(CancellationToken ct)
     {
         return await _db.Ribbons

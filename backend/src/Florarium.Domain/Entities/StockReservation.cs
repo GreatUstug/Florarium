@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Временное резервирование остатка для корзины или заказа.</summary>
 public class StockReservation
 {
     public Guid Id { get; set; }

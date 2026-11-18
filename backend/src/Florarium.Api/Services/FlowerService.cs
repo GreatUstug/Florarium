@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис FlowersService.</summary>
 public class FlowersService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет GetListAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<IReadOnlyList<FlowerListItemDto>> GetListAsync(string? search, IEnumerable<string>? colors, bool onlyAvailible, CancellationToken ct)
     {
         var q = _db.Flowers
@@ -58,6 +61,8 @@ public class FlowersService(AppDbContext db)
         return list;
     }
 
+    /// <summary>Выполняет GetColorsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<IReadOnlyList<string>> GetColorsAsync(CancellationToken ct)
     {
         return await _db.Flowers

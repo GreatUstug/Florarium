@@ -7,6 +7,7 @@ namespace Florarium.Api.Controllers;
 
 [ApiController]
 [Route("api/flowers")]
+/// <summary>Каталог цветов и справочник цветовых групп.</summary>
 public class FlowersController : ControllerBase
 {
     private readonly FlowersService _flowers;
@@ -18,6 +19,14 @@ public class FlowersController : ControllerBase
     /// Возвращает только активные цветы (IsActive = true).
     /// </summary>
     [HttpGet]
+    /// <remarks>Возвращаются только активные цветы с учетом остатка при фильтре доступности.</remarks>
+    /// <param name="search">Поиск по названию или характеристикам.</param>
+    /// <param name="color">Фильтр по цветовым группам.</param>
+    /// <param name="onlyAvailable">Показывать только цветы с остатком.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Список активных цветов.</returns>
+    /// <response code="200">Список цветов получен.</response>
+    [ProducesResponseType(typeof(IReadOnlyList<FlowerListItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<FlowerListItemDto>>> GetList(
         [FromQuery] string? search,
         [FromQuery] string[]? color,
@@ -33,6 +42,11 @@ public class FlowersController : ControllerBase
     /// Используется для фильтра на экране каталога.
     /// </summary>
     [HttpGet("colors")]
+    /// <remarks>Возвращаются уникальные значения для активных цветов.</remarks>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Список названий цветовых групп.</returns>
+    /// <response code="200">Справочник цветов получен.</response>
+    [ProducesResponseType(typeof(IReadOnlyList<string>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<string>>> GetColors(CancellationToken ct = default)
     {
         var colors = await _flowers.GetColorsAsync(ct);

@@ -2,6 +2,7 @@
 
 namespace Florarium.Domain.Entities;
 
+/// <summary>Данные доставки: получатель, дата, временной слот и состояние исполнения.</summary>
 public class Delivery
 {
     public Guid Id { get; set; }

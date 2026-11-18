@@ -10,11 +10,22 @@ namespace Florarium.Api.Controllers;
 [ApiController]
 [Route("api/me/orders")]
 [Authorize]
+/// <summary>Просмотр истории заказов текущего пользователя.</summary>
 public class MeOrdersController(OrdersService ordersService) : ControllerBase
 {
     private readonly OrdersService _ordersService = ordersService;
 
     [HttpGet]
+    /// <summary>Возвращает постраничный список заказов пользователя.</summary>
+    /// <param name="status">Необязательный фильтр по статусу заказа.</param>
+    /// <param name="page">Номер страницы.</param>
+    /// <param name="pageSize">Размер страницы.</param>
+    /// <param name="ct">Токен отмены операции.</param>
+    /// <returns>Постраничный список заказов.</returns>
+    /// <response code="200">Заказы получены.</response>
+    /// <response code="401">Пользователь не авторизован.</response>
+    [ProducesResponseType(typeof(PagedResponse<OrderListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedResponse<OrderListDto>>> GetMyOrders(
         [FromQuery] string? status,
         [FromQuery] int page = 1,

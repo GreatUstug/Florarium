@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Позиция заказа с купленным составом, количеством и ценой.</summary>
 public class OrderItem
 {
     public Guid Id { get; set; }

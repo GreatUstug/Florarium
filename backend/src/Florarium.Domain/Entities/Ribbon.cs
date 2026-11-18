@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Вариант ленты для оформления букета.</summary>
 public class Ribbon
 {
     public Guid Id { get; set; }

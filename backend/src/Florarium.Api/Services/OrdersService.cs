@@ -10,11 +10,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис OrdersService.</summary>
 public class OrdersService(AppDbContext db, CartService cartService)
 {
     private readonly AppDbContext _db = db;
     private readonly CartService _cartService = cartService;
 
+    /// <summary>Выполняет CreateOrderAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<OrderCreatedResponse> CreateOrderAsync(Guid userId, CreateOrderRequest request, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
@@ -145,6 +148,8 @@ public class OrdersService(AppDbContext db, CartService cartService)
         };
     }
 
+    /// <summary>Выполняет PayOrderAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<OrderDetailDto> PayOrderAsync(Guid userId, Guid orderId, CancellationToken ct)
     {
         var order = await _db.Orders
@@ -170,6 +175,8 @@ public class OrdersService(AppDbContext db, CartService cartService)
         return (await GetOrderByIdAsync(userId, orderId, ct))!;
     }
 
+    /// <summary>Выполняет GetUserOrdersAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<PagedResponse<OrderListDto>> GetUserOrdersAsync(Guid userId, string? statusFilter, int page, int pageSize, CancellationToken ct)
     {
         var query = _db.Orders.AsNoTracking().Where(o => o.CustomerId == userId);
@@ -211,6 +218,8 @@ public class OrdersService(AppDbContext db, CartService cartService)
         return new PagedResponse<OrderListDto> { Items = items, Total = total, Page = page, PageSize = pageSize };
     }
 
+    /// <summary>Выполняет GetOrderByIdAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<OrderDetailDto?> GetOrderByIdAsync(Guid userId, Guid orderId, CancellationToken ct)
     {
         var order = await _db.Orders
@@ -272,6 +281,8 @@ public class OrdersService(AppDbContext db, CartService cartService)
         };
     }
 
+    /// <summary>Выполняет CancelOrderAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<OrderDetailDto> CancelOrderAsync(Guid userId, Guid orderId, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
@@ -321,6 +332,8 @@ public class OrdersService(AppDbContext db, CartService cartService)
         return (await GetOrderByIdAsync(userId, orderId, ct))!;
     }
 
+    /// <summary>Выполняет RepeatOrderAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<RepeatOrderResponse> RepeatOrderAsync(Guid userId, Guid orderId, CancellationToken ct)
     {
         var order = await _db.Orders

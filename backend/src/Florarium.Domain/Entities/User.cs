@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Пользователь магазина: регистрационные данные, роль и связанные сущности.</summary>
 public class User
 {
     public Guid Id { get; set; }

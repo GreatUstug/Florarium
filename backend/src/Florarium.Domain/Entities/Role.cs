@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Роль пользователя, определяющая доступные операции.</summary>
 public class Role
 {
     public Guid Id { get; set; }

@@ -2,6 +2,7 @@
 
 namespace Florarium.Domain.Entities;
 
+/// <summary>Букет из готового каталога или индивидуально собранный состав.</summary>
 public class Composition
 {
     public Guid Id { get; set; }

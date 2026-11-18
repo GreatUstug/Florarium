@@ -8,17 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис CartService.</summary>
 public class CartService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
     private const int ReservationTtlMinutes = 15;
 
+    /// <summary>Выполняет GetCartAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CartResponse> GetCartAsync(Guid userId, CancellationToken ct)
     {
         var cart = await GetOrCreateCartAsync(userId, ct);
         return await MapToResponseAsync(cart, ct);
     }
 
+    /// <summary>Выполняет AddItemAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CartResponse> AddItemAsync(Guid userId, AddToCartRequest request, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
@@ -124,6 +129,8 @@ public class CartService(AppDbContext db)
         return await MapToResponseAsync(cart, ct);
     }
 
+    /// <summary>Выполняет UpdateItemQtyAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CartResponse> UpdateItemQtyAsync(Guid userId, Guid itemId, int newQty, CancellationToken ct)
     {
         if (newQty <= 0) return await RemoveItemAsync(userId, itemId, ct);
@@ -198,6 +205,8 @@ public class CartService(AppDbContext db)
         return await MapToResponseAsync(cart, ct);
     }
 
+    /// <summary>Выполняет RemoveItemAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CartResponse> RemoveItemAsync(Guid userId, Guid itemId, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
@@ -216,6 +225,8 @@ public class CartService(AppDbContext db)
         return await MapToResponseAsync(cart, ct);
     }
 
+    /// <summary>Выполняет ClearCartAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task ClearCartAsync(Guid userId, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);

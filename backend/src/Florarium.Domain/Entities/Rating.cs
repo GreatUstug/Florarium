@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Оценка и текстовый отзыв покупателя на позицию заказа.</summary>
 public class Rating
 {
     public Guid Id { get; set; }

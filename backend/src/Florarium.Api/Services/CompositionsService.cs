@@ -11,10 +11,13 @@ using Florarium.Api.Dtos.Common;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис CompositionsService.</summary>
 public class CompositionsService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет QuoteAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<QuoteResponse> QuoteAsync(QuoteRequest request, CancellationToken ct)
     {
         var flowerIds = request.Items.Select(i => i.FlowerId).Distinct().ToList();
@@ -74,6 +77,8 @@ public class CompositionsService(AppDbContext db)
         return response;
     }
 
+    /// <summary>Выполняет CreateAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CompositionDetailDto> CreateAsync(
     SaveCompositionRequest request, Guid authorId, CancellationToken ct)
     {
@@ -141,6 +146,8 @@ public class CompositionsService(AppDbContext db)
             ?? throw new Exception("Ошибка при создании состава");
     }
 
+    /// <summary>Выполняет GetByIdAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CompositionDetailDto?> GetByIdAsync(
         Guid id, Guid? currentUserId, CancellationToken ct)
     {
@@ -213,6 +220,8 @@ public class CompositionsService(AppDbContext db)
         };
     }
 
+    /// <summary>Выполняет UpdateAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<CompositionDetailDto> UpdateAsync(Guid id, SaveCompositionRequest request, Guid authorId, CancellationToken ct)
     {
         var composition = await _db.Compositions
@@ -276,6 +285,8 @@ public class CompositionsService(AppDbContext db)
             ?? throw new Exception("Состав не найден после обновления");
     }
 
+    /// <summary>Выполняет GetUserCompositionsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<PagedResponse<CompositionListDto>> GetUserCompositionsAsync(Guid userId, int page, int pageSize, CancellationToken ct)
     {
         var query = _db.Compositions
@@ -309,6 +320,8 @@ public class CompositionsService(AppDbContext db)
         return new PagedResponse<CompositionListDto> { Items = items, Total = total, Page = page, PageSize = pageSize };
     }
 
+    /// <summary>Выполняет DeleteCompositionAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task DeleteCompositionAsync(Guid userId, Guid id, CancellationToken ct)
     {
         var comp = await _db.Compositions

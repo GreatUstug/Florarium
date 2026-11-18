@@ -2,6 +2,7 @@
 
 namespace Florarium.Domain.Entities;
 
+/// <summary>Платежная операция заказа с методом и статусом оплаты.</summary>
 public class Payment
 {
     public Guid Id { get; set; }

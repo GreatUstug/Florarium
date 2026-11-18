@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Корзина одного пользователя.</summary>
 public class Cart
 {
     public Guid Id { get; set; }

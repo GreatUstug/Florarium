@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис ReservationCleanupService.</summary>
 public class ReservationCleanupService(IServiceProvider services, ILogger<ReservationCleanupService> logger) : BackgroundService
 {
     private readonly IServiceProvider _services = services;

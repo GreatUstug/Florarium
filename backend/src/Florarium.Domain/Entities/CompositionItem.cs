@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Строка состава букета: цветок и требуемое количество стеблей.</summary>
 public class CompositionItem
 {
     public Guid Id { get; set; }

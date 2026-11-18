@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Актуальное количество и доступность конкретного цветка на складе.</summary>
 public class Stock
 {
     public Guid FlowerId { get; set; }

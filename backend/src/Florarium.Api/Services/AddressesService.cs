@@ -6,10 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис AddressesService.</summary>
 public class AddressesService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет GetUserAddressesAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<List<AddressDto>> GetUserAddressesAsync(Guid userId, CancellationToken ct)
     {
         return await _db.Addresses
@@ -28,6 +31,8 @@ public class AddressesService(AppDbContext db)
             .ToListAsync(ct);
     }
 
+    /// <summary>Выполняет CreateAddressAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<AddressDto> CreateAddressAsync(Guid userId, CreateAddressRequest request, CancellationToken ct)
     {
         var address = new Address

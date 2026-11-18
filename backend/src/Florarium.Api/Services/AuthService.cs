@@ -8,11 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис AuthService.</summary>
 public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
 {
     private readonly AppDbContext _db = db;
     private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
 
+    /// <summary>Выполняет RegisterAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<UserResponse> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
         var email = request.Email.Trim().ToLowerInvariant();
@@ -39,6 +42,8 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
         return MapToResponse(user);
     }
 
+    /// <summary>Выполняет VerifyCredentialsAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<User?> VerifyCredentialsAsync(string email, string password, CancellationToken ct)
     {
         email = email.Trim().ToLowerInvariant();
@@ -54,6 +59,8 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
         return result == PasswordVerificationResult.Failed ? null : user;
     }
 
+    /// <summary>Выполняет MapToResponse.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public UserResponse MapToResponse(User user)
     {
         return new UserResponse

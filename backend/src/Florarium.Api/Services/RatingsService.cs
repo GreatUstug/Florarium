@@ -7,10 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
 
+/// <summary>Сервис RatingsService.</summary>
 public class RatingsService(AppDbContext db)
 {
     private readonly AppDbContext _db = db;
 
+    /// <summary>Выполняет AddRatingAsync.</summary>
+    /// <exception cref="Florarium.Api.Exceptions.ApiException">Возникает при нарушении бизнес-правил операции.</exception>
     public async Task<RatingDto> AddRatingAsync(Guid userId, Guid orderItemId, CreateRatingRequest request, CancellationToken ct)
     {
         var orderItem = await _db.OrderItems

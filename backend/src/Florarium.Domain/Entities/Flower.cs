@@ -1,5 +1,6 @@
 namespace Florarium.Domain.Entities;
 
+/// <summary>Каталожный цветок с ценой, характеристиками и признаком активности.</summary>
 public class Flower
 {
     public Guid Id { get; set; }

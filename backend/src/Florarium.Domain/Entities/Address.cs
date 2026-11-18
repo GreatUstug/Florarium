@@ -1,5 +1,6 @@
 ﻿namespace Florarium.Domain.Entities;
 
+/// <summary>Адрес доставки, сохраненный пользователем.</summary>
 public class Address
 {
     public Guid Id { get; set; }
