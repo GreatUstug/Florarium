@@ -13,20 +13,25 @@ namespace Florarium.Api.Services;
 public class OrdersService(AppDbContext db, CartService cartService)
 {
     private readonly AppDbContext _db = db;
-
     private readonly CartService _cartService = cartService;
 
     public async Task<OrderCreatedResponse> CreateOrderAsync(Guid userId, CreateOrderRequest request, CancellationToken ct)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
+        var cartId = await _db.Database
+            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM cart WHERE customer_id = {userId} FOR UPDATE")
+            .FirstOrDefaultAsync(ct);
+
+        if (cartId == Guid.Empty)
+            throw new ApiException(409, "cart_empty", "Корзина пуста");
+
         var cart = await _db.Carts
             .Include(c => c.Items)
             .ThenInclude(i => i.Composition)
             .ThenInclude(c => c.Items)
             .ThenInclude(i => i.Flower)
-            .ThenInclude(f => f.Stock)
-            .FirstOrDefaultAsync(c => c.CustomerId == userId, ct);
+            .FirstOrDefaultAsync(c => c.Id == cartId, ct);
 
         if (cart == null || cart.Items.Count == 0)
             throw new ApiException(409, "cart_empty", "Корзина пуста");
@@ -35,9 +40,14 @@ public class OrdersService(AppDbContext db, CartService cartService)
         if (address == null)
             throw new ApiException(400, "validation_failed", "Адрес не найден");
 
-        var flowerIds = cart.Items.SelectMany(i => i.Composition.Items.Select(ci => ci.FlowerId)).Distinct().ToArray();
+        var flowerIds = cart.Items
+            .SelectMany(i => i.Composition.Items.Select(ci => ci.FlowerId))
+            .Distinct()
+            .OrderBy(id => id)
+            .ToArray();
+
         var stocks = await _db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
             .ToDictionaryAsync(s => s.FlowerId, ct);
 
         foreach (var cartItem in cart.Items)
@@ -47,11 +57,15 @@ public class OrdersService(AppDbContext db, CartService cartService)
 
             foreach (var compItem in cartItem.Composition.Items)
             {
-                var stock = stocks[compItem.FlowerId];
+                if (!stocks.TryGetValue(compItem.FlowerId, out var stock))
+                    throw new ApiException(409, "out_of_stock",
+                        $"Товар {compItem.Flower.Name} отсутствует на складе");
+
                 int totalToDeduct = compItem.Qty * cartItem.Qty;
 
                 if (stock.Available < totalToDeduct || stock.Reserved < totalToDeduct)
-                    throw new ApiException(409, "out_of_stock", $"Недостаточно цветов на складе для оформления заказа");
+                    throw new ApiException(409, "out_of_stock",
+                        "Недостаточно цветов на складе для оформления заказа");
 
                 stock.Available -= totalToDeduct;
                 stock.Reserved -= totalToDeduct;
@@ -68,7 +82,7 @@ public class OrdersService(AppDbContext db, CartService cartService)
         {
             Number = orderNumber,
             CustomerId = userId,
-            Status = request.PaymentMethod == PaymentMethod.Online ? OrderStatus.New : OrderStatus.New,
+            Status = OrderStatus.New,
             CreatedAt = DateTime.UtcNow,
             Subtotal = cart.Items.Sum(i => i.Qty * i.UnitPrice),
             Discount = 0,
@@ -109,7 +123,11 @@ public class OrdersService(AppDbContext db, CartService cartService)
 
         _db.Orders.Add(order);
 
-        var reservations = await _db.StockReservations.Where(r => cart.Items.Select(ci => ci.Id).Contains(r.CartItemId)).ToListAsync(ct);
+        var cartItemIds = cart.Items.Select(ci => ci.Id).ToList();
+        var reservations = await _db.StockReservations
+            .Where(r => cartItemIds.Contains(r.CartItemId))
+            .ToListAsync(ct);
+
         _db.StockReservations.RemoveRange(reservations);
         _db.CartItems.RemoveRange(cart.Items);
 
@@ -233,6 +251,7 @@ public class OrdersService(AppDbContext db, CartService cartService)
                     Source = i.Composition.Source.ToString().ToLower()
                 }
             })],
+
             Delivery = order.Delivery != null ? new OrderDeliveryFullDto
             {
                 RecipientName = order.Delivery.RecipientName,
@@ -241,7 +260,7 @@ public class OrdersService(AppDbContext db, CartService cartService)
                 CourierNote = order.Delivery.CourierNote,
                 Status = order.Delivery.Status.ToString().ToLower(),
                 DeliveredAt = order.Delivery.DeliveredAt
-            } : null!,
+            } : null,
             Payments = [.. order.Payments.Select(p => new OrderPaymentDto
             {
                 Id = p.Id,
@@ -268,17 +287,26 @@ public class OrdersService(AppDbContext db, CartService cartService)
         if (order.Status != OrderStatus.New && order.Status != OrderStatus.Paid)
             throw new ApiException(409, "order_not_cancellable", "Заказ уже нельзя отменить");
 
-        var flowerIds = order.Items.SelectMany(i => i.Composition.Items.Select(ci => ci.FlowerId)).Distinct().ToArray();
+        var flowerIds = order.Items
+            .SelectMany(i => i.Composition.Items.Select(ci => ci.FlowerId))
+            .Distinct()
+            .OrderBy(id => id)
+            .ToArray();
+
         var stocks = await _db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
             .ToDictionaryAsync(s => s.FlowerId, ct);
 
         foreach (var item in order.Items)
         {
             foreach (var compItem in item.Composition.Items)
             {
+                if (!stocks.TryGetValue(compItem.FlowerId, out var stock))
+                    throw new ApiException(409, "out_of_stock",
+                        $"Товар {compItem.Flower.Name} отсутствует на складе");
+
                 int totalToReturn = compItem.Qty * item.Qty;
-                stocks[compItem.FlowerId].Available += totalToReturn;
+                stock.Available += totalToReturn;
             }
         }
 

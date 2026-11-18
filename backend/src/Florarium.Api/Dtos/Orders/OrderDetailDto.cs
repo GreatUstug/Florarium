@@ -11,7 +11,7 @@ public class OrderDetailDto
     public decimal Total { get; set; }
     
     public List<OrderItemDto> Items { get; set; } = [];
-    public OrderDeliveryFullDto Delivery { get; set; } = null!;
+    public OrderDeliveryFullDto? Delivery { get; set; }
     public List<OrderPaymentDto> Payments { get; set; } = [];
 
     public bool CanCancel { get; set; }

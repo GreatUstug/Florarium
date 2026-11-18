@@ -36,6 +36,7 @@ public class ReservationCleanupService(IServiceProvider services, ILogger<Reserv
         var now = DateTime.UtcNow;
 
         var expired = await db.StockReservations
+            .Include(r => r.CartItem)
             .Where(r => r.ExpiresAt < now)
             .ToListAsync(ct);
 
@@ -44,7 +45,7 @@ public class ReservationCleanupService(IServiceProvider services, ILogger<Reserv
         var flowerIds = expired.Select(r => r.FlowerId).Distinct().ToArray();
 
         var stocks = await db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stocks WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
             .ToDictionaryAsync(s => s.FlowerId, ct);
 
         foreach (var res in expired)
@@ -55,10 +56,14 @@ public class ReservationCleanupService(IServiceProvider services, ILogger<Reserv
             }
         }
 
+        var cartItemsToRemove = expired.Select(r => r.CartItem).Where(ci => ci != null).Distinct().ToList();
+        db.CartItems.RemoveRange(cartItemsToRemove);
+
         db.StockReservations.RemoveRange(expired);
+
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
 
-        _logger.LogInformation("Очищено {Count} просроченных резервов.", expired.Count);
+        _logger.LogInformation("Очищено {Count} просроченных резервов и удалено {CartCount} позиций из корзин.", expired.Count, cartItemsToRemove.Count);
     }
 }

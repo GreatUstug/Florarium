@@ -3,6 +3,7 @@ using Florarium.Api.Exceptions;
 using Florarium.Data;
 using Florarium.Domain.Entities;
 using Florarium.Domain.Enums;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Florarium.Api.Services;
@@ -22,8 +23,6 @@ public class CartService(AppDbContext db)
     {
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-        var cart = await GetOrCreateCartAsync(userId, ct);
-
         var composition = await _db.Compositions
             .Include(c => c.Items).ThenInclude(i => i.Flower)
             .FirstOrDefaultAsync(c => c.Id == request.CompositionId, ct);
@@ -34,24 +33,28 @@ public class CartService(AppDbContext db)
         if (composition.Items.Any(i => !i.Flower.IsActive))
             throw new ApiException(409, "flower_inactive", "В составе букета есть снятые с продажи цветы");
 
+        var flowerIds = composition.Items.Select(i => i.FlowerId).Distinct().OrderBy(id => id).ToArray();
+        var stocks = await _db.Stocks
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
+            .ToDictionaryAsync(s => s.FlowerId, ct);
+
+        var cart = await GetOrCreateCartAsync(userId, ct);
         var existingItem = cart.Items.FirstOrDefault(i => i.CompositionId == request.CompositionId);
+
         int addedQty = request.Qty;
         int newTotalQty = (existingItem?.Qty ?? 0) + addedQty;
 
-        var flowerIds = composition.Items.Select(i => i.FlowerId).ToArray();
-        var stocks = await _db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
-            .ToDictionaryAsync(s => s.FlowerId, ct);
-
         foreach (var compItem in composition.Items)
         {
-            var stock = stocks[compItem.FlowerId];
+            if (!stocks.TryGetValue(compItem.FlowerId, out var stock))
+                throw new ApiException(409, "out_of_stock", $"Товар {compItem.Flower.Name} отсутствует на складе");
+
             int neededForAdd = compItem.Qty * addedQty;
             int freeStock = stock.Available - stock.Reserved;
 
             if (freeStock < neededForAdd)
             {
-                throw new ApiException(409, "out_of_stock", 
+                throw new ApiException(409, "out_of_stock",
                     $"Недостаточно цветов {compItem.Flower.Name} на складе (требуется ещё {neededForAdd}, свободно {freeStock})");
             }
         }
@@ -68,12 +71,28 @@ public class CartService(AppDbContext db)
             existingItem.Qty = newTotalQty;
             existingItem.UnitPrice = composition.Price;
 
-            var reservations = await _db.StockReservations.Where(r => r.CartItemId == existingItem.Id).ToListAsync(ct);
-            foreach (var res in reservations)
+            var reservations = await _db.StockReservations
+                .Where(r => r.CartItemId == existingItem.Id)
+                .ToListAsync(ct);
+
+            foreach (var compItem in composition.Items)
             {
-                var compItem = composition.Items.First(i => i.FlowerId == res.FlowerId);
-                res.Qty = compItem.Qty * newTotalQty;
-                res.ExpiresAt = expiresAt;
+                var res = reservations.FirstOrDefault(r => r.FlowerId == compItem.FlowerId);
+                if (res != null)
+                {
+                    res.Qty = compItem.Qty * newTotalQty;
+                    res.ExpiresAt = expiresAt;
+                }
+                else
+                {
+                    _db.StockReservations.Add(new StockReservation
+                    {
+                        FlowerId = compItem.FlowerId,
+                        CartItemId = existingItem.Id,
+                        Qty = compItem.Qty * newTotalQty,
+                        ExpiresAt = expiresAt
+                    });
+                }
             }
         }
         else
@@ -119,20 +138,25 @@ public class CartService(AppDbContext db)
             .Include(c => c.Items)
             .FirstOrDefaultAsync(c => c.Id == cartItem.CompositionId, ct);
 
+        if (composition == null)
+            throw new ApiException(409, "composition_deleted", "Букет больше не доступен");
+
         int delta = newQty - cartItem.Qty;
 
         if (delta != 0)
         {
-            var flowerIds = composition!.Items.Select(i => i.FlowerId).ToArray();
+            var flowerIds = composition.Items.Select(i => i.FlowerId).Distinct().OrderBy(id => id).ToArray();
             var stocks = await _db.Stocks
-                .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+                .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
                 .ToDictionaryAsync(s => s.FlowerId, ct);
 
             if (delta > 0)
             {
                 foreach (var compItem in composition.Items)
                 {
-                    var stock = stocks[compItem.FlowerId];
+                    if (!stocks.TryGetValue(compItem.FlowerId, out var stock))
+                        throw new ApiException(409, "out_of_stock", "Товар отсутствует на складе");
+
                     int needed = compItem.Qty * delta;
                     int free = stock.Available - stock.Reserved;
 
@@ -143,15 +167,25 @@ public class CartService(AppDbContext db)
 
             foreach (var compItem in composition.Items)
             {
-                stocks[compItem.FlowerId].Reserved += compItem.Qty * delta;
+                if (stocks.TryGetValue(compItem.FlowerId, out var stock))
+                {
+                    stock.Reserved = Math.Max(0, stock.Reserved + compItem.Qty * delta);
+                }
             }
 
-            var reservations = await _db.StockReservations.Where(r => r.CartItemId == cartItem.Id).ToListAsync(ct);
+            var reservations = await _db.StockReservations
+                .Where(r => r.CartItemId == cartItem.Id)
+                .ToListAsync(ct);
             DateTime expiresAt = DateTime.UtcNow.AddMinutes(ReservationTtlMinutes);
 
             foreach (var res in reservations)
             {
-                var compItem = composition.Items.First(i => i.FlowerId == res.FlowerId);
+                var compItem = composition.Items.FirstOrDefault(i => i.FlowerId == res.FlowerId);
+                if (compItem == null)
+                {
+                    _db.StockReservations.Remove(res);
+                    continue;
+                }
                 res.Qty = compItem.Qty * newQty;
                 res.ExpiresAt = expiresAt;
             }
@@ -206,9 +240,9 @@ public class CartService(AppDbContext db)
 
         if (reservations.Count == 0) return;
 
-        var flowerIds = reservations.Select(r => r.FlowerId).Distinct().ToArray();
+        var flowerIds = reservations.Select(r => r.FlowerId).Distinct().OrderBy(id => id).ToArray();
         var stocks = await _db.Stocks
-            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM stock WHERE flower_id = ANY({flowerIds}) ORDER BY flower_id FOR UPDATE")
             .ToDictionaryAsync(s => s.FlowerId, ct);
 
         foreach (var res in reservations)
