@@ -27,7 +27,7 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> passwordHasher)
         {
             Name = request.Name.Trim(),
             Email = email,
-            Phone = request.Phone,
+            Phone = request.Phone?.Trim(),
             Role = clientRole
         };
 
