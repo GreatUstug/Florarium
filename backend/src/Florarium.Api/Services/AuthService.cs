@@ -1,4 +1,5 @@
 using Florarium.Api.Dtos.Auth;
+using Florarium.Api.Exceptions;
 using Florarium.Data;
 using Florarium.Domain.Entities;
 
@@ -17,7 +18,7 @@ public class AuthService(AppDbContext db)
         var email = request.Email.Trim().ToLowerInvariant();
 
         if (await _db.Users.AnyAsync(u => u.Email == email, ct))
-            throw new InvalidOperationException("Пользователь с таким email уже существует");
+            throw new ApiException(409, "email_taken", "Пользователь с таким email уже существует");
 
         var clientRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "client", ct) 
             ?? throw new Exception("Роль 'client' не найдена в БД");
